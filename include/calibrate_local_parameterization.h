@@ -1,5 +1,4 @@
 #pragma once
-
 #include "utility/utility.h"
 #include <ceres/ceres.h>
 #include <eigen3/Eigen/Dense>

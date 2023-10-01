@@ -31,7 +31,6 @@ std::vector<Eigen::Matrix3d> Viocalibrate::GetImuRotation(void) {
 void Viocalibrate::IMULocalization(double dt,
                                    const Eigen::Vector3d &linear_acceleration,
                                    const Eigen::Vector3d &angular_velocity) {
-  std::cout << "function FrameCount_: " << FrameCount_ << std::endl;
   Ba_[FrameCount_].setZero();
   Bg_[FrameCount_].setZero();
   if (!first_imu) {
@@ -40,22 +39,13 @@ void Viocalibrate::IMULocalization(double dt,
     gyr_0 = angular_velocity;
   }
   if (!PreIntegrations_[FrameCount_]) {
-    std::cout << "no thing" << std::endl;
-  } else {
-    std::cout << " some thing" << std::endl;
-  }
-
-  if (!PreIntegrations_[FrameCount_]) {
-    std::cout << "in create if" << std::endl;
     PreIntegrations_[FrameCount_] =
         new ImuIntegration{acc_0, gyr_0, Ba_[FrameCount_], Bg_[FrameCount_]};
   }
   if (FrameCount_ != 0) {
-    std::cout << "in push if" << std::endl;
     PreIntegrations_[FrameCount_]->push_back(dt, linear_acceleration,
                                              angular_velocity);
   }
-  std::cout << " IMULocalization " << std::endl;
   acc_0 = linear_acceleration; // variable of estimator class
   gyr_0 = angular_velocity;    // variable of estimator class
 }
@@ -79,7 +69,13 @@ bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
   ric = Eigen::Matrix3d::Identity();
   for (int i = 0; i < WINDOW_SIZE; i++) {
     Rc.push_back(delta_R_cam[i]);
+    Eigen::Quaterniond qqq(delta_R_cam[i]);
+    std::cout << "CAM: " << qqq.x() << ", " << qqq.y() << ", " << qqq.z()
+              << ", " << qqq.w() << std::endl;
     Rimu.push_back(delta_R_imu[i]);
+    Eigen::Quaterniond qq(delta_R_imu[i]);
+    std::cout << "IMU: " << qq.x() << ", " << qq.y() << ", " << qq.z() << ", "
+              << qq.w() << std::endl;
     Rc_g.push_back(ric.inverse() * delta_R_imu[i] * ric);
   }
 
@@ -122,13 +118,11 @@ bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
   // std::cout << ric << std::endl;
   Eigen::Vector3d ric_cov;
   ric_cov = svd.singularValues().tail<3>();
+  ExtrinsicValidation(delta_R_cam, delta_R_imu, ric);
   if (ric_cov(1) > 0.25) {
     calib_ric_result = ric;
-    std::cout << "calib_ric_result: " << calib_ric_result << std::endl;
-
     return true;
   } else {
-    std::cout << "calib_ric_result: " << calib_ric_result << std::endl;
     return false;
   }
 }
@@ -157,4 +151,17 @@ void Viocalibrate::InitState() {
   first_imu = false;
   FrameCount_ = 0;
   Imu_g = {0, 0, 9.81};
-};
+}
+
+bool Viocalibrate::ExtrinsicValidation(std::vector<Eigen::Matrix3d> delta_R_cam,
+                                       std::vector<Eigen::Matrix3d> delta_R_imu,
+                                       Eigen::Matrix3d &calib_ric_result) {
+
+  for (int i = 0; i < delta_R_cam.size(); i++) {
+    std::cout << "imu: " << std::endl
+              << delta_R_imu[i] * calib_ric_result << std::endl;
+    std::cout << "cam: " << std::endl
+              << calib_ric_result * delta_R_cam[i] << std::endl;
+  }
+  return true;
+}

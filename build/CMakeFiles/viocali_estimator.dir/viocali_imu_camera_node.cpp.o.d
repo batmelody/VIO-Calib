@@ -1,10 +1,10 @@
 CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /home/weizhengyu/VIOCALI/viocali_imu_camera_node.cpp \
  /usr/include/stdc-predef.h \
- /home/weizhengyu/VIOCALI/include/viocali_calibrate.h \
- /home/weizhengyu/VIOCALI/include/parameters.h \
- /home/weizhengyu/VIOCALI/include/utility/utility.h \
- /usr/include/c++/9/cassert \
+ /home/weizhengyu/VIOCALI/include/utility/data_reader.h \
+ /usr/include/eigen3/Eigen/Dense /usr/include/eigen3/Eigen/Core \
+ /usr/include/eigen3/Eigen/src/Core/util/DisableStupidWarnings.h \
+ /usr/include/c++/9/new \
  /usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
@@ -13,9 +13,19 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/cpu_defines.h \
- /usr/include/assert.h /usr/include/c++/9/cmath \
- /usr/include/c++/9/bits/cpp_type_traits.h \
- /usr/include/c++/9/ext/type_traits.h /usr/include/math.h \
+ /usr/include/c++/9/exception /usr/include/c++/9/bits/exception.h \
+ /usr/include/c++/9/bits/exception_ptr.h \
+ /usr/include/c++/9/bits/exception_defines.h \
+ /usr/include/c++/9/bits/cxxabi_init_exception.h \
+ /usr/lib/gcc/x86_64-linux-gnu/9/include/stddef.h \
+ /usr/include/c++/9/typeinfo /usr/include/c++/9/bits/hash_bytes.h \
+ /usr/include/c++/9/bits/nested_exception.h \
+ /usr/include/c++/9/bits/move.h /usr/include/c++/9/bits/concept_check.h \
+ /usr/include/c++/9/type_traits \
+ /usr/include/eigen3/Eigen/src/Core/util/Macros.h \
+ /usr/include/c++/9/complex /usr/include/c++/9/bits/cpp_type_traits.h \
+ /usr/include/c++/9/ext/type_traits.h /usr/include/c++/9/cmath \
+ /usr/include/math.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/x86_64-linux-gnu/bits/types.h \
  /usr/include/x86_64-linux-gnu/bits/timesize.h \
@@ -34,7 +44,6 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
  /usr/include/x86_64-linux-gnu/bits/mathinline.h \
  /usr/include/c++/9/bits/std_abs.h /usr/include/stdlib.h \
- /usr/lib/gcc/x86_64-linux-gnu/9/include/stddef.h \
  /usr/include/x86_64-linux-gnu/bits/waitflags.h \
  /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
@@ -63,23 +72,7 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h /usr/include/alloca.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib.h /usr/include/c++/9/cstring \
- /usr/include/string.h /usr/include/strings.h \
- /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
- /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
- /usr/include/eigen3/Eigen/Dense /usr/include/eigen3/Eigen/Core \
- /usr/include/eigen3/Eigen/src/Core/util/DisableStupidWarnings.h \
- /usr/include/c++/9/new /usr/include/c++/9/exception \
- /usr/include/c++/9/bits/exception.h \
- /usr/include/c++/9/bits/exception_ptr.h \
- /usr/include/c++/9/bits/exception_defines.h \
- /usr/include/c++/9/bits/cxxabi_init_exception.h \
- /usr/include/c++/9/typeinfo /usr/include/c++/9/bits/hash_bytes.h \
- /usr/include/c++/9/bits/nested_exception.h \
- /usr/include/c++/9/bits/move.h /usr/include/c++/9/bits/concept_check.h \
- /usr/include/c++/9/type_traits \
- /usr/include/eigen3/Eigen/src/Core/util/Macros.h \
- /usr/include/c++/9/complex /usr/include/c++/9/sstream \
+ /usr/include/x86_64-linux-gnu/bits/stdlib.h /usr/include/c++/9/sstream \
  /usr/include/c++/9/istream /usr/include/c++/9/ios \
  /usr/include/c++/9/iosfwd /usr/include/c++/9/bits/stringfwd.h \
  /usr/include/c++/9/bits/memoryfwd.h /usr/include/c++/9/bits/postypes.h \
@@ -173,12 +166,16 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/lib/gcc/x86_64-linux-gnu/9/include/xmmintrin.h \
  /usr/lib/gcc/x86_64-linux-gnu/9/include/mm_malloc.h \
  /usr/include/c++/9/stdlib.h /usr/include/c++/9/cstddef \
+ /usr/include/c++/9/cassert /usr/include/assert.h \
  /usr/include/c++/9/functional /usr/include/c++/9/tuple \
  /usr/include/c++/9/utility /usr/include/c++/9/bits/stl_relops.h \
  /usr/include/c++/9/array /usr/include/c++/9/bits/uses_allocator.h \
  /usr/include/c++/9/bits/invoke.h /usr/include/c++/9/bits/refwrap.h \
- /usr/include/c++/9/bits/std_function.h /usr/include/c++/9/limits \
- /usr/include/c++/9/climits \
+ /usr/include/c++/9/bits/std_function.h /usr/include/c++/9/cstring \
+ /usr/include/string.h /usr/include/strings.h \
+ /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
+ /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+ /usr/include/c++/9/limits /usr/include/c++/9/climits \
  /usr/lib/gcc/x86_64-linux-gnu/9/include/limits.h \
  /usr/lib/gcc/x86_64-linux-gnu/9/include/syslimits.h \
  /usr/include/limits.h /usr/include/x86_64-linux-gnu/bits/posix1_lim.h \
@@ -221,20 +218,20 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/include/eigen3/Eigen/src/Core/IO.h \
  /usr/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h \
  /usr/include/eigen3/Eigen/src/Core/DenseBase.h \
- /usr/include/eigen3/Eigen/src/plugins/BlockMethods.h \
+ /usr/include/eigen3/Eigen/src/Core/../plugins/BlockMethods.h \
  /usr/include/eigen3/Eigen/src/Core/MatrixBase.h \
- /usr/include/eigen3/Eigen/src/plugins/CommonCwiseUnaryOps.h \
- /usr/include/eigen3/Eigen/src/plugins/CommonCwiseBinaryOps.h \
- /usr/include/eigen3/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
- /usr/include/eigen3/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
+ /usr/include/eigen3/Eigen/src/Core/../plugins/CommonCwiseUnaryOps.h \
+ /usr/include/eigen3/Eigen/src/Core/../plugins/CommonCwiseBinaryOps.h \
+ /usr/include/eigen3/Eigen/src/Core/../plugins/MatrixCwiseUnaryOps.h \
+ /usr/include/eigen3/Eigen/src/Core/../plugins/MatrixCwiseBinaryOps.h \
  /usr/include/eigen3/Eigen/src/Core/EigenBase.h \
  /usr/include/eigen3/Eigen/src/Core/Product.h \
  /usr/include/eigen3/Eigen/src/Core/CoreEvaluators.h \
  /usr/include/eigen3/Eigen/src/Core/AssignEvaluator.h \
  /usr/include/eigen3/Eigen/src/Core/Assign.h \
  /usr/include/eigen3/Eigen/src/Core/ArrayBase.h \
- /usr/include/eigen3/Eigen/src/plugins/ArrayCwiseUnaryOps.h \
- /usr/include/eigen3/Eigen/src/plugins/ArrayCwiseBinaryOps.h \
+ /usr/include/eigen3/Eigen/src/Core/../plugins/ArrayCwiseUnaryOps.h \
+ /usr/include/eigen3/Eigen/src/Core/../plugins/ArrayCwiseBinaryOps.h \
  /usr/include/eigen3/Eigen/src/Core/util/BlasUtil.h \
  /usr/include/eigen3/Eigen/src/Core/DenseStorage.h \
  /usr/include/eigen3/Eigen/src/Core/NestByValue.h \
@@ -345,46 +342,32 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/include/eigen3/Eigen/Eigenvalues \
  /usr/include/eigen3/Eigen/src/Eigenvalues/Tridiagonalization.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/RealSchur.h \
- /usr/include/eigen3/Eigen/src/Eigenvalues/HessenbergDecomposition.h \
+ /usr/include/eigen3/Eigen/src/Eigenvalues/./HessenbergDecomposition.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/EigenSolver.h \
- /usr/include/eigen3/Eigen/src/Eigenvalues/RealSchur.h \
+ /usr/include/eigen3/Eigen/src/Eigenvalues/./RealSchur.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/SelfAdjointEigenSolver.h \
- /usr/include/eigen3/Eigen/src/Eigenvalues/Tridiagonalization.h \
+ /usr/include/eigen3/Eigen/src/Eigenvalues/./Tridiagonalization.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/GeneralizedSelfAdjointEigenSolver.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/HessenbergDecomposition.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/ComplexSchur.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/ComplexEigenSolver.h \
- /usr/include/eigen3/Eigen/src/Eigenvalues/ComplexSchur.h \
+ /usr/include/eigen3/Eigen/src/Eigenvalues/./ComplexSchur.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/RealQZ.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/GeneralizedEigenSolver.h \
- /usr/include/eigen3/Eigen/src/Eigenvalues/RealQZ.h \
+ /usr/include/eigen3/Eigen/src/Eigenvalues/./RealQZ.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h \
- /usr/include/libgen.h /usr/include/x86_64-linux-gnu/sys/stat.h \
- /usr/include/x86_64-linux-gnu/bits/stat.h \
- /usr/include/x86_64-linux-gnu/bits/statx.h /usr/include/linux/stat.h \
- /usr/include/linux/types.h /usr/include/x86_64-linux-gnu/asm/types.h \
- /usr/include/asm-generic/types.h /usr/include/asm-generic/int-ll64.h \
- /usr/include/x86_64-linux-gnu/asm/bitsperlong.h \
- /usr/include/asm-generic/bitsperlong.h /usr/include/linux/posix_types.h \
- /usr/include/linux/stddef.h \
- /usr/include/x86_64-linux-gnu/asm/posix_types.h \
- /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
- /usr/include/asm-generic/posix_types.h \
- /usr/include/x86_64-linux-gnu/bits/statx-generic.h \
- /usr/include/x86_64-linux-gnu/bits/types/struct_statx_timestamp.h \
- /usr/include/x86_64-linux-gnu/bits/types/struct_statx.h \
  /usr/include/c++/9/fstream /usr/include/c++/9/bits/codecvt.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/c++io.h \
- /usr/include/c++/9/bits/fstream.tcc \
- /usr/include/opencv4/opencv2/core/eigen.hpp \
+ /usr/include/c++/9/bits/fstream.tcc /usr/include/c++/9/iostream \
+ /usr/include/opencv4/opencv2/opencv.hpp \
+ /usr/include/opencv4/opencv2/opencv_modules.hpp \
  /usr/include/opencv4/opencv2/core.hpp \
  /usr/include/opencv4/opencv2/core/cvdef.h \
  /usr/include/opencv4/opencv2/core/hal/interface.h \
  /usr/include/opencv4/opencv2/core/cv_cpu_dispatch.h \
  /usr/include/opencv4/opencv2/core/version.hpp \
  /usr/include/opencv4/opencv2/core/base.hpp \
- /usr/include/opencv4/opencv2/opencv_modules.hpp \
  /usr/include/opencv4/opencv2/core/cvstd.hpp \
  /usr/include/opencv4/opencv2/core/cvstd_wrapper.hpp \
  /usr/include/c++/9/memory /usr/include/c++/9/bits/stl_uninitialized.h \
@@ -424,7 +407,6 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/include/opencv4/opencv2/core/optim.hpp \
  /usr/include/opencv4/opencv2/core/ovx.hpp \
  /usr/include/opencv4/opencv2/core/cvdef.h \
- /usr/include/opencv4/opencv2/opencv.hpp \
  /usr/include/opencv4/opencv2/calib3d.hpp \
  /usr/include/opencv4/opencv2/features2d.hpp \
  /usr/include/opencv4/opencv2/flann/miniflann.hpp \
@@ -449,7 +431,7 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/include/opencv4/opencv2/flann/matrix.h \
  /usr/include/opencv4/opencv2/flann/params.h \
  /usr/include/opencv4/opencv2/flann/any.h \
- /usr/include/opencv4/opencv2/flann/defines.h /usr/include/c++/9/iostream \
+ /usr/include/opencv4/opencv2/flann/defines.h \
  /usr/include/opencv4/opencv2/flann/saving.h \
  /usr/include/opencv4/opencv2/flann/nn_index.h \
  /usr/include/opencv4/opencv2/flann/result_set.h /usr/include/c++/9/set \
@@ -545,6 +527,25 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/include/opencv4/opencv2/viz/widgets.hpp \
  /usr/include/opencv4/opencv2/viz/viz3d.hpp \
  /usr/include/opencv4/opencv2/viz/vizcore.hpp \
+ /home/weizhengyu/VIOCALI/include/viocali_calibrate.h \
+ /home/weizhengyu/VIOCALI/include/parameters.h \
+ /home/weizhengyu/VIOCALI/include/utility/utility.h \
+ /usr/include/eigen3/Eigen/Dense /usr/include/libgen.h \
+ /usr/include/x86_64-linux-gnu/sys/stat.h \
+ /usr/include/x86_64-linux-gnu/bits/stat.h \
+ /usr/include/x86_64-linux-gnu/bits/statx.h /usr/include/linux/stat.h \
+ /usr/include/linux/types.h /usr/include/x86_64-linux-gnu/asm/types.h \
+ /usr/include/asm-generic/types.h /usr/include/asm-generic/int-ll64.h \
+ /usr/include/x86_64-linux-gnu/asm/bitsperlong.h \
+ /usr/include/asm-generic/bitsperlong.h /usr/include/linux/posix_types.h \
+ /usr/include/linux/stddef.h \
+ /usr/include/x86_64-linux-gnu/asm/posix_types.h \
+ /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
+ /usr/include/asm-generic/posix_types.h \
+ /usr/include/x86_64-linux-gnu/bits/statx-generic.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_statx_timestamp.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_statx.h \
+ /usr/include/opencv4/opencv2/core/eigen.hpp \
  /home/weizhengyu/VIOCALI/include/viocali_camera_factor.h \
  /usr/local/include/ceres/ceres.h \
  /usr/local/include/ceres/autodiff_cost_function.h \
@@ -586,7 +587,7 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/local/include/ceres/dynamic_autodiff_cost_function.h \
  /usr/local/include/ceres/dynamic_numeric_diff_cost_function.h \
  /usr/local/include/ceres/internal/numeric_diff.h \
- /usr/include/eigen3/Eigen/Dense /usr/include/eigen3/Eigen/StdVector \
+ /usr/include/eigen3/Eigen/StdVector \
  /usr/include/eigen3/Eigen/src/StlSupport/StdVector.h \
  /usr/include/eigen3/Eigen/src/StlSupport/details.h \
  /usr/local/include/ceres/numeric_diff_options.h \

@@ -73,99 +73,99 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: CMakeFiles/vioca
 CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: ../viocali_imu_camera_node.cpp
 CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: CMakeFiles/viocali_estimator.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/weizhengyu/VIOCALI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o -MF CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o.d -o CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o -c /home/weizhengyu/VIOCALI/viocali_imu_camera_node.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o -MF CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o.d -o CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o -c /home/weizhengyu/VIOCALI/viocali_imu_camera_node.cpp
 
 CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/viocali_imu_camera_node.cpp > CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/viocali_imu_camera_node.cpp > CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.i
 
 CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/viocali_imu_camera_node.cpp -o CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/viocali_imu_camera_node.cpp -o CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.s
 
 CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o: CMakeFiles/viocali_estimator.dir/flags.make
 CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o: ../src/viocali_calibrate.cpp
 CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o: CMakeFiles/viocali_estimator.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/weizhengyu/VIOCALI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o -c /home/weizhengyu/VIOCALI/src/viocali_calibrate.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o -c /home/weizhengyu/VIOCALI/src/viocali_calibrate.cpp
 
 CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/viocali_calibrate.cpp > CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/viocali_calibrate.cpp > CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.i
 
 CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/viocali_calibrate.cpp -o CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/viocali_calibrate.cpp -o CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.s
 
 CMakeFiles/viocali_estimator.dir/src/parameters.cpp.o: CMakeFiles/viocali_estimator.dir/flags.make
 CMakeFiles/viocali_estimator.dir/src/parameters.cpp.o: ../src/parameters.cpp
 CMakeFiles/viocali_estimator.dir/src/parameters.cpp.o: CMakeFiles/viocali_estimator.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/weizhengyu/VIOCALI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/viocali_estimator.dir/src/parameters.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/parameters.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/parameters.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/parameters.cpp.o -c /home/weizhengyu/VIOCALI/src/parameters.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/parameters.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/parameters.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/parameters.cpp.o -c /home/weizhengyu/VIOCALI/src/parameters.cpp
 
 CMakeFiles/viocali_estimator.dir/src/parameters.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/viocali_estimator.dir/src/parameters.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/parameters.cpp > CMakeFiles/viocali_estimator.dir/src/parameters.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/parameters.cpp > CMakeFiles/viocali_estimator.dir/src/parameters.cpp.i
 
 CMakeFiles/viocali_estimator.dir/src/parameters.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/viocali_estimator.dir/src/parameters.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/parameters.cpp -o CMakeFiles/viocali_estimator.dir/src/parameters.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/parameters.cpp -o CMakeFiles/viocali_estimator.dir/src/parameters.cpp.s
 
 CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.o: CMakeFiles/viocali_estimator.dir/flags.make
 CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.o: ../src/calibrate_local_parameterization.cpp
 CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.o: CMakeFiles/viocali_estimator.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/weizhengyu/VIOCALI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.o -c /home/weizhengyu/VIOCALI/src/calibrate_local_parameterization.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.o -c /home/weizhengyu/VIOCALI/src/calibrate_local_parameterization.cpp
 
 CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/calibrate_local_parameterization.cpp > CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/calibrate_local_parameterization.cpp > CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.i
 
 CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/calibrate_local_parameterization.cpp -o CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/calibrate_local_parameterization.cpp -o CMakeFiles/viocali_estimator.dir/src/calibrate_local_parameterization.cpp.s
 
 CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.o: CMakeFiles/viocali_estimator.dir/flags.make
 CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.o: ../src/viocali_camera_factor.cpp
 CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.o: CMakeFiles/viocali_estimator.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/weizhengyu/VIOCALI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.o -c /home/weizhengyu/VIOCALI/src/viocali_camera_factor.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.o -c /home/weizhengyu/VIOCALI/src/viocali_camera_factor.cpp
 
 CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/viocali_camera_factor.cpp > CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/viocali_camera_factor.cpp > CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.i
 
 CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/viocali_camera_factor.cpp -o CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/viocali_camera_factor.cpp -o CMakeFiles/viocali_estimator.dir/src/viocali_camera_factor.cpp.s
 
 CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.o: CMakeFiles/viocali_estimator.dir/flags.make
 CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.o: ../src/viocali_imu_factor.cpp
 CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.o: CMakeFiles/viocali_estimator.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/weizhengyu/VIOCALI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.o -c /home/weizhengyu/VIOCALI/src/viocali_imu_factor.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.o -c /home/weizhengyu/VIOCALI/src/viocali_imu_factor.cpp
 
 CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/viocali_imu_factor.cpp > CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/viocali_imu_factor.cpp > CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.i
 
 CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/viocali_imu_factor.cpp -o CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/viocali_imu_factor.cpp -o CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.s
 
 CMakeFiles/viocali_estimator.dir/src/utility.cpp.o: CMakeFiles/viocali_estimator.dir/flags.make
 CMakeFiles/viocali_estimator.dir/src/utility.cpp.o: ../src/utility.cpp
 CMakeFiles/viocali_estimator.dir/src/utility.cpp.o: CMakeFiles/viocali_estimator.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/weizhengyu/VIOCALI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/viocali_estimator.dir/src/utility.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/utility.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/utility.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/utility.cpp.o -c /home/weizhengyu/VIOCALI/src/utility.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/viocali_estimator.dir/src/utility.cpp.o -MF CMakeFiles/viocali_estimator.dir/src/utility.cpp.o.d -o CMakeFiles/viocali_estimator.dir/src/utility.cpp.o -c /home/weizhengyu/VIOCALI/src/utility.cpp
 
 CMakeFiles/viocali_estimator.dir/src/utility.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/viocali_estimator.dir/src/utility.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/utility.cpp > CMakeFiles/viocali_estimator.dir/src/utility.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/weizhengyu/VIOCALI/src/utility.cpp > CMakeFiles/viocali_estimator.dir/src/utility.cpp.i
 
 CMakeFiles/viocali_estimator.dir/src/utility.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/viocali_estimator.dir/src/utility.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/utility.cpp -o CMakeFiles/viocali_estimator.dir/src/utility.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/weizhengyu/VIOCALI/src/utility.cpp -o CMakeFiles/viocali_estimator.dir/src/utility.cpp.s
 
 # Object files for target viocali_estimator
 viocali_estimator_OBJECTS = \

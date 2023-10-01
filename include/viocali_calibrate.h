@@ -32,6 +32,10 @@ public:
                            std::vector<Eigen::Matrix3d> delta_R_imu,
                            Eigen::Matrix3d &calib_ric_result);
 
+  bool ExtrinsicValidation(std::vector<Eigen::Matrix3d> delta_R_cam,
+                           std::vector<Eigen::Matrix3d> delta_R_imu,
+                           Eigen::Matrix3d &calib_ric_result);
+
   void SolveDeltaRFromse3(std::vector<Eigen::Matrix3d> &Rcw,
                           std::vector<Eigen::Matrix3d> &delta_R_cam);
 
