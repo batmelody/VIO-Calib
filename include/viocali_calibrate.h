@@ -22,12 +22,32 @@ public:
     InitState();
   };
   ~Viocalibrate(){};
+
+  /**
+   * IMU Porpagation gets Pre-Integrations of IMU, which is the core;
+   * @param[in] linear_acceleration : acc mes in body frame;
+   * @param[in] angular_velocity : gyro mes in body frame;
+   * @return no return.
+   */
   void IMULocalization(double dt, const Eigen::Vector3d &linear_acceleration,
                        const Eigen::Vector3d &angular_velocity);
 
+  /**
+   * Cam Localization gets poses of Cam, using PnP and BA, which is the core ;
+   * @param[in] world_corner : world coor of feature points;
+   * @param[in] image_corner : image coor of feature points;
+   * @return no return.
+   */
   bool CameraLocalization(std::vector<std::vector<cv::Point3f>> world_corner,
                           std::vector<std::vector<cv::Point2f>> image_corner);
 
+  /**
+   * calibrate Extrinsic of Cam and IMU, which is the core;
+   * @param[in] delta_R_cam : Pre-Integrations of Camera frames;
+   * @param[in] delta_R_imu : Pre-Integrations of IMU frames;
+   * @param[out] calib_ric_result : Output of Extrinsic;
+   * @return 1 if success, error code otherwise.
+   */
   bool CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
                            std::vector<Eigen::Matrix3d> delta_R_imu,
                            Eigen::Matrix3d &calib_ric_result);
@@ -36,6 +56,13 @@ public:
                            std::vector<Eigen::Matrix3d> delta_R_imu,
                            Eigen::Matrix3d &calib_ric_result);
 
+  /**
+   * Get Pre-Integrations of Cam Rotations;
+   * @param[in] Rwc : Rotation from ck frame to world frame;
+   * @param[out] delta_R_cam : Pre-Integrations of Camera frames, which means
+   * R^{ck}_{ck+1};
+   * @return no return.
+   */
   void SolveCamDeltaR(std::vector<Eigen::Matrix3d> &Rwc,
                       std::vector<Eigen::Matrix3d> &delta_R_cam);
 

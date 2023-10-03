@@ -73,10 +73,10 @@ bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
     Rimu.push_back(delta_R_imu[i]);
   }
 
-  Eigen::MatrixXd A(2 * 4, 4);
+  Eigen::MatrixXd A(WINDOW_SIZE * 4, 4);
   A.setZero();
   int sum_ok = 0;
-  for (int i = 1; i <= 2; i++) {
+  for (int i = 1; i < WINDOW_SIZE - 1; i++) {
     Eigen::Matrix4d L, R;
     double w = Eigen::Quaterniond(Rc[i]).w();
     Eigen::Vector3d q = Eigen::Quaterniond(Rc[i]).vec();
@@ -113,7 +113,6 @@ bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
   }
 }
 
-/*Note: the rotations are from camera-frame to world-frame*/
 void Viocalibrate::SolveCamDeltaR(std::vector<Eigen::Matrix3d> &Rwc,
                                   std::vector<Eigen::Matrix3d> &delta_R_cam) {
   for (int i = 0; i < WINDOW_SIZE; i++) {
