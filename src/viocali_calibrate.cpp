@@ -66,29 +66,17 @@ bool Viocalibrate::CameraLocalization(
 bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
                                        std::vector<Eigen::Matrix3d> delta_R_imu,
                                        Eigen::Matrix3d &calib_ric_result) {
+
   ric = Eigen::Matrix3d::Identity();
-  for (int i = 0; i < WINDOW_SIZE; i++) {
+  for (int i = 0; i < WINDOW_SIZE - 1; i++) {
     Rc.push_back(delta_R_cam[i]);
-    Eigen::Quaterniond qqq(delta_R_cam[i]);
-    std::cout << "CAM: " << qqq.x() << ", " << qqq.y() << ", " << qqq.z()
-              << ", " << qqq.w() << std::endl;
     Rimu.push_back(delta_R_imu[i]);
-    Eigen::Quaterniond qq(delta_R_imu[i]);
-    std::cout << "IMU: " << qq.x() << ", " << qq.y() << ", " << qq.z() << ", "
-              << qq.w() << std::endl;
-    Rc_g.push_back(ric.inverse() * delta_R_imu[i] * ric);
   }
 
-  Eigen::MatrixXd A(WINDOW_SIZE * 4, 4);
+  Eigen::MatrixXd A(2 * 4, 4);
   A.setZero();
   int sum_ok = 0;
-  for (int i = 1; i <= WINDOW_SIZE; i++) {
-    Eigen::Quaterniond r1(Rc[i]);
-    Eigen::Quaterniond r2(Rc_g[i]);
-
-    double angular_distance = 180 / M_PI * r1.angularDistance(r2);
-    double huber = angular_distance > 5.0 ? 5.0 / angular_distance : 1.0;
-    ++sum_ok;
+  for (int i = 1; i <= 2; i++) {
     Eigen::Matrix4d L, R;
     double w = Eigen::Quaterniond(Rc[i]).w();
     Eigen::Vector3d q = Eigen::Quaterniond(Rc[i]).vec();
@@ -107,18 +95,16 @@ bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
     R.block<1, 3>(3, 0) = -q.transpose();
     R(3, 3) = w;
 
-    A.block<4, 4>((i - 1) * 4, 0) = huber * (L - R);
+    A.block<4, 4>((i - 1) * 4, 0) = (L - R);
   }
   Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeFullU |
                                                Eigen::ComputeFullV);
   Eigen::Matrix<double, 4, 1> x = svd.matrixV().col(3);
   Eigen::Quaterniond estimated_R(x);
   ric = estimated_R.toRotationMatrix().inverse();
-  // std::cout << svd.singularValues().transpose() << std::endl;
-  // std::cout << ric << std::endl;
   Eigen::Vector3d ric_cov;
   ric_cov = svd.singularValues().tail<3>();
-  ExtrinsicValidation(delta_R_cam, delta_R_imu, ric);
+  std::cout << "ric: " << std::endl << ric;
   if (ric_cov(1) > 0.25) {
     calib_ric_result = ric;
     return true;
@@ -127,14 +113,14 @@ bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
   }
 }
 
-void Viocalibrate::SolveDeltaRFromse3(
-    std::vector<Eigen::Matrix3d> &Rcw,
-    std::vector<Eigen::Matrix3d> &delta_R_cam) {
+/*Note: the rotations are from camera-frame to world-frame*/
+void Viocalibrate::SolveCamDeltaR(std::vector<Eigen::Matrix3d> &Rwc,
+                                  std::vector<Eigen::Matrix3d> &delta_R_cam) {
   for (int i = 0; i < WINDOW_SIZE; i++) {
-    Eigen::Matrix3d Rcur = Rcw[i];
-    Eigen::Matrix3d Rnext = Rcw[i + 1];
-    Rnext = Rnext.inverse().eval();
-    delta_R_cam.push_back(Rcur * Rnext);
+    Eigen::Matrix3d Rcur = Rwc[i];
+    Eigen::Matrix3d Rnext = Rwc[i + 1];
+    Rcur = Rcur.inverse().eval();
+    delta_R_cam.push_back((Rcur * Rnext));
   }
 }
 
@@ -163,5 +149,6 @@ bool Viocalibrate::ExtrinsicValidation(std::vector<Eigen::Matrix3d> delta_R_cam,
     std::cout << "cam: " << std::endl
               << calib_ric_result * delta_R_cam[i] << std::endl;
   }
+  std::cout << "ric: " << std::endl << calib_ric_result << std::endl;
   return true;
 }

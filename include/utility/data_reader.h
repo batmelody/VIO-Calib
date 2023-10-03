@@ -20,8 +20,13 @@ struct ImageData {
   std::vector<cv::Point3f> Points3d;
 };
 
+struct CameraData {
+  double timestamp;
+  Eigen::Quaterniond Qwc;
+};
+
 std::queue<ImuData> ReadImuDataFromSimulation(const std::string &filename) {
-  int unit_time = 1000000000;
+  int unit_time = 1;
   std::queue<ImuData> data;
   std::ifstream file(filename);
   if (!file.is_open()) {
@@ -34,19 +39,57 @@ std::queue<ImuData> ReadImuDataFromSimulation(const std::string &filename) {
     int col = 0;
     std::stringstream ss(line);
     std::string str;
-    while (std::getline(ss, str, ',')) {
+    while (std::getline(ss, str, ' ')) {
       if (col == 0) {
         imuData.timestamp = std::stod(str) / unit_time;
       }
-      if (col > 0 & col < 4) {
-        imuData.gyro[col - 1] = std::stod(str);
+      if (col > 7 & col < 11) {
+        imuData.gyro[col - 8] = std::stod(str);
       }
-      if (col > 3) {
-        imuData.acc[col - 4] = std::stod(str);
+      if (col > 10) {
+        imuData.acc[col - 11] = std::stod(str);
       }
       col++;
     }
     data.push(imuData);
+  }
+  file.close();
+  return data;
+}
+
+std::queue<CameraData> ReadCamDataFromSimulation(const std::string &filename) {
+  int unit_time = 1;
+  std::queue<CameraData> data;
+  std::ifstream file(filename);
+  if (!file.is_open()) {
+    std::cerr << "Could not open file: " << filename << std::endl;
+    return data;
+  }
+  std::string line;
+  while (std::getline(file, line)) {
+    CameraData cameraData;
+    int col = 0;
+    std::stringstream ss(line);
+    std::string str;
+    while (std::getline(ss, str, ' ')) {
+      if (col == 0) {
+        cameraData.timestamp = std::stod(str) / unit_time;
+      }
+      if (col == 1) {
+        cameraData.Qwc.w() = std::stod(str);
+      }
+      if (col == 2) {
+        cameraData.Qwc.x() = std::stod(str);
+      }
+      if (col == 3) {
+        cameraData.Qwc.y() = std::stod(str);
+      }
+      if (col == 4) {
+        cameraData.Qwc.z() = std::stod(str);
+      }
+      col++;
+    }
+    data.push(cameraData);
   }
   file.close();
   return data;

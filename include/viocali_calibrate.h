@@ -36,8 +36,8 @@ public:
                            std::vector<Eigen::Matrix3d> delta_R_imu,
                            Eigen::Matrix3d &calib_ric_result);
 
-  void SolveDeltaRFromse3(std::vector<Eigen::Matrix3d> &Rcw,
-                          std::vector<Eigen::Matrix3d> &delta_R_cam);
+  void SolveCamDeltaR(std::vector<Eigen::Matrix3d> &Rwc,
+                      std::vector<Eigen::Matrix3d> &delta_R_cam);
 
   void InitState();
 
