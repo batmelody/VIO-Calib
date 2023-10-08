@@ -52,6 +52,9 @@ public:
                            std::vector<Eigen::Matrix3d> delta_R_imu,
                            Eigen::Matrix3d &calib_ric_result);
 
+  void ExtrinsicROptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
+                           std::vector<Eigen::Matrix3d> delta_R_imu);
+
   bool ExtrinsicValidation(std::vector<Eigen::Matrix3d> delta_R_cam,
                            std::vector<Eigen::Matrix3d> delta_R_imu,
                            Eigen::Matrix3d &calib_ric_result);

@@ -44,7 +44,7 @@ void ImuIntegration::repropagate(const Eigen::Vector3d &_linearized_ba,
     propagate(dt_buf[i], acc_buf[i], gyr_buf[i]);
 }
 
-void ImuIntegration::midPointIntegration(
+void ImuIntegration::MidPointIntegration(
     double _dt, const Eigen::Vector3d &_acc_0, const Eigen::Vector3d &_gyr_0,
     const Eigen::Vector3d &_acc_1, const Eigen::Vector3d &_gyr_1,
     const Eigen::Vector3d &delta_p, const Eigen::Quaterniond &delta_q,
@@ -53,6 +53,8 @@ void ImuIntegration::midPointIntegration(
     Eigen::Quaterniond &result_delta_q, Eigen::Vector3d &result_delta_v,
     Eigen::Vector3d &result_linearized_ba,
     Eigen::Vector3d &result_linearized_bg, bool update_jacobian) {
+  //   std::cout << "_acc_0: " << std::endl << _acc_0 << std::endl;
+  //   std::cout << "_acc_1: " << std::endl << _acc_1 << std::endl;
   Eigen::Vector3d un_acc_0 = delta_q * (_acc_0 - linearized_ba);
   Eigen::Vector3d un_gyr = 0.5 * (_gyr_0 + _gyr_1) - linearized_bg;
   result_delta_q =
@@ -138,14 +140,10 @@ void ImuIntegration::propagate(double _dt, const Eigen::Vector3d &_acc_1,
   Eigen::Vector3d result_delta_v;
   Eigen::Vector3d result_linearized_ba;
   Eigen::Vector3d result_linearized_bg;
-
-  midPointIntegration(_dt, acc_0, gyr_0, _acc_1, _gyr_1, delta_p, delta_q,
+  MidPointIntegration(_dt, acc_0, gyr_0, _acc_1, _gyr_1, delta_p, delta_q,
                       delta_v, linearized_ba, linearized_bg, result_delta_p,
                       result_delta_q, result_delta_v, result_linearized_ba,
                       result_linearized_bg, 1);
-
-  // checkJacobian(_dt, acc_0, gyr_0, acc_1, gyr_1, delta_p, delta_q, delta_v,
-  //                     linearized_ba, linearized_bg);
   delta_p = result_delta_p;
   delta_q = result_delta_q;
   delta_v = result_delta_v;
@@ -167,12 +165,9 @@ Eigen::Matrix<double, 15, 1> ImuIntegration::evaluate(
 
   Eigen::Matrix3d dp_dba = jacobian.block<3, 3>(O_P, O_BA);
   Eigen::Matrix3d dp_dbg = jacobian.block<3, 3>(O_P, O_BG);
-
   Eigen::Matrix3d dq_dbg = jacobian.block<3, 3>(O_R, O_BG);
-
   Eigen::Matrix3d dv_dba = jacobian.block<3, 3>(O_V, O_BA);
   Eigen::Matrix3d dv_dbg = jacobian.block<3, 3>(O_V, O_BG);
-
   Eigen::Vector3d dba = Bai - linearized_ba;
   Eigen::Vector3d dbg = Bgi - linearized_bg;
 
@@ -325,6 +320,28 @@ bool ImuFactor::Evaluate(double const *const *parameters, double *residuals,
           Eigen::Matrix3d::Identity();
 
       jacobian_speedbias_j = sqrt_info * jacobian_speedbias_j;
+    }
+  }
+  return true;
+}
+
+QuaternionFactor::QuaternionFactor(const Eigen::Matrix4d &A,
+                                   const Eigen::Vector4d &obs)
+    : A_(A), obs_(obs){};
+
+bool QuaternionFactor::Evaluate(double const *const *parameters,
+                                double *residuals, double **jacobians) const {
+  Eigen::Map<Eigen::Vector4d> residual(residuals);
+  Eigen::Vector4d Qcb;
+  Qcb << parameters[0][0], parameters[0][1], parameters[0][2], parameters[0][3];
+
+  residual = obs_ - A_ * Qcb;
+  if (jacobians) {
+    if (jacobians[0]) {
+      Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>> jacobian_Qcb(
+          jacobians[0]);
+      jacobian_Qcb.setZero();
+      jacobian_Qcb = -1 * A_;
     }
   }
   return true;

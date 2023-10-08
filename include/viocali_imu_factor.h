@@ -22,7 +22,7 @@ public:
   void repropagate(const Eigen::Vector3d &_linearized_ba,
                    const Eigen::Vector3d &_linearized_bg);
 
-  void midPointIntegration(
+  void MidPointIntegration(
       double _dt, const Eigen::Vector3d &_acc_0, const Eigen::Vector3d &_gyr_0,
       const Eigen::Vector3d &_acc_1, const Eigen::Vector3d &_gyr_1,
       const Eigen::Vector3d &delta_p, const Eigen::Quaterniond &delta_q,
@@ -67,4 +67,14 @@ public:
   virtual bool Evaluate(double const *const *parameters, double *residuals,
                         double **jacobians) const;
   ImuIntegration *PreIntegration;
+};
+
+class QuaternionFactor : public ceres::SizedCostFunction<4, 4> {
+public:
+  QuaternionFactor(const Eigen::Matrix4d &A, const Eigen::Vector4d &obs);
+  virtual bool Evaluate(double const *const *parameters, double *residuals,
+                        double **jacobians) const;
+
+  Eigen::Matrix4d A_;
+  Eigen::Vector4d obs_;
 };
