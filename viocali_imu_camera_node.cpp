@@ -212,36 +212,21 @@ int run_for_synthesis_data() {
                   << std::endl;
         current_time = imu_t;
         viocali->IMULocalization(dt, imu.acc, imu.gyro);
-        save_points
-            << viocali->PreIntegrations_[viocali->FrameCount_]->sum_dt << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_q.w()
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_q.x()
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_q.y()
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_q.z()
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_p(0)
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_p(1)
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_p(2)
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_q.w()
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_q.x()
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_q.y()
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_q.z()
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_p(0)
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_p(1)
-            << " "
-            << viocali->PreIntegrations_[viocali->FrameCount_]->delta_p(2)
-            << " " << std::endl;
+      } else {
+        double dt_1 = cam_t - current_time;
+        double dt_2 = imu_t - cam_t;
+        current_time = cam_t;
+        double w1 = dt_2 / (dt_1 + dt_2);
+        double w2 = dt_1 / (dt_1 + dt_2);
+        double dx = w1 * dx + w2 * imu.acc.x();
+        double dy = w1 * dy + w2 * imu.acc.y();
+        double dz = w1 * dz + w2 * imu.acc.z();
+        double rx = w1 * rx + w2 * imu.gyro.x();
+        double ry = w1 * ry + w2 * imu.gyro.y();
+        double rz = w1 * rz + w2 * imu.gyro.z();
+        std::cout << "tail dt: " << dt_1 << std::endl;
+        viocali->IMULocalization(dt_1, Eigen::Vector3d(dx, dy, dz),
+                                 Eigen::Vector3d(rx, ry, rz));
       }
     }
     Qwcs.push_back(mes.second.Qwc);

@@ -53,8 +53,6 @@ void ImuIntegration::MidPointIntegration(
     Eigen::Quaterniond &result_delta_q, Eigen::Vector3d &result_delta_v,
     Eigen::Vector3d &result_linearized_ba,
     Eigen::Vector3d &result_linearized_bg, bool update_jacobian) {
-  //   std::cout << "_acc_0: " << std::endl << _acc_0 << std::endl;
-  //   std::cout << "_acc_1: " << std::endl << _acc_1 << std::endl;
   Eigen::Vector3d un_acc_0 = delta_q * (_acc_0 - linearized_ba);
   Eigen::Vector3d un_gyr = 0.5 * (_gyr_0 + _gyr_1) - linearized_bg;
   result_delta_q =
@@ -162,7 +160,6 @@ Eigen::Matrix<double, 15, 1> ImuIntegration::evaluate(
     const Eigen::Quaterniond &Qj, const Eigen::Vector3d &Vj,
     const Eigen::Vector3d &Baj, const Eigen::Vector3d &Bgj) {
   Eigen::Matrix<double, 15, 1> residuals;
-
   Eigen::Matrix3d dp_dba = jacobian.block<3, 3>(O_P, O_BA);
   Eigen::Matrix3d dp_dbg = jacobian.block<3, 3>(O_P, O_BG);
   Eigen::Matrix3d dq_dbg = jacobian.block<3, 3>(O_R, O_BG);
@@ -170,7 +167,6 @@ Eigen::Matrix<double, 15, 1> ImuIntegration::evaluate(
   Eigen::Matrix3d dv_dbg = jacobian.block<3, 3>(O_V, O_BG);
   Eigen::Vector3d dba = Bai - linearized_ba;
   Eigen::Vector3d dbg = Bgi - linearized_bg;
-
   Eigen::Quaterniond corrected_delta_q =
       delta_q * Utility::deltaQ(dq_dbg * dbg);
   Eigen::Vector3d corrected_delta_v = delta_v + dv_dba * dba + dv_dbg * dbg;

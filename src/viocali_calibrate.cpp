@@ -41,8 +41,10 @@ void Viocalibrate::IMULocalization(double dt,
         new ImuIntegration{acc_0, gyr_0, Ba_[FrameCount_], Bg_[FrameCount_]};
   }
   if (!first_imu) {
-    PreIntegrations_[FrameCount_]->push_back(dt, linear_acceleration,
-                                             angular_velocity);
+    if (FrameCount_ != 0) {
+      PreIntegrations_[FrameCount_]->push_back(dt, linear_acceleration,
+                                               angular_velocity);
+    }
   }
   acc_0 = linear_acceleration; // variable of estimator class
   gyr_0 = angular_velocity;    // variable of estimator class
