@@ -1,0 +1,21 @@
+%YAML:1.0
+---
+
+#cam
+cam_dir: "/home/weizhengyu/VIO_Simulation/bin/cam_pose.txt"
+cam_name: "WZY Camera"
+squaresize: 0.04
+
+boardsize:
+ width: 11
+ height: 16
+ 
+imagesize:
+ width: 1280
+ height: 960
+
+#imu
+imu_dir: "/home/weizhengyu/VIO_Simulation/bin/imu_pose.txt"
+imu_fps: 300
+
+

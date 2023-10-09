@@ -168,12 +168,29 @@ int run_for_real_data() {
 
 int run_for_synthesis_data() {
   /*init parameters*/
-  cv::Size boardSize(11, 16);
-  cv::Size imageSize(1280, 960);
-  float squareSize = 0.04;
+  cv::FileStorage fs("../config/vio-config.yaml", cv::FileStorage::READ);
+  if (!fs.isOpened()) {
+    std::cerr << "Failed to open config file!" << std::endl;
+    return -1;
+  }
+  cv::Size boardSize;
+  cv::Size imageSize;
+  float squareSize;
   int WindowSize = 20;
   double current_time = -0.01;
-  std::string cameraName = "WZY Camera";
+  std::string cameraName;
+  std::string imuFileName; // 替换为你的CSV文件名
+  std::string camFileName; // 替换为你的CSV文件名
+
+  fs["boardsize"] >> boardSize;
+  fs["imagesize"] >> imageSize;
+  fs["squaresize"] >> squareSize;
+  fs["cam_name"] >> cameraName;
+  fs["imu_dir"] >> imuFileName;
+  fs["cam_dir"] >> camFileName;
+
+  std::cout << " squareSize " << squareSize << std::endl;
+
   Camera::ModelType modelType = Camera::ModelType::PINHOLE;
   std::vector<std::vector<cv::Point3f>> world_corner;
   std::vector<std::vector<cv::Point2f>> image_corner;
@@ -182,16 +199,9 @@ int run_for_synthesis_data() {
   std::vector<Eigen::Quaterniond> Qwcs;
   std::vector<Eigen::Matrix3d> delta_R_cam;
   std::vector<Eigen::Matrix3d> delta_R_imu;
-  const std::string imufilename = "/home/weizhengyu/VIO_Simulation/bin/"
-                                  "imu_pose.txt"; // 替换为你的CSV文件名
-  const std::string camfilename = "/home/weizhengyu/VIO_Simulation/bin/"
-                                  "cam_pose.txt"; // 替换为你的CSV文件名
 
-  auto imuData = ReadImuDataFromSimulation(imufilename);
-  std::cout << "imuDataSize: " << imuData.size() << std::endl;
-  auto camData = ReadCamDataFromSimulation(camfilename);
-  std::cout << "imgDataSize: " << camData.size() << std::endl;
-
+  auto imuData = ReadImuDataFromSimulation(imuFileName);
+  auto camData = ReadCamDataFromSimulation(camFileName);
   std::vector<std::pair<std::vector<ImuData>, CameraData>> Mes =
       DataSynthesis(imuData, camData, 0); //仿真数据暂时不设置td
   double imu_first, cam_first;
@@ -236,7 +246,6 @@ int run_for_synthesis_data() {
       viocali->FrameCount_++;
     }
   }
-
   std::vector<Eigen::Matrix3d> Rwc;
   for (auto &q : Qwcs) {
     Rwc.push_back(q.toRotationMatrix());
