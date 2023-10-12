@@ -320,25 +320,3 @@ bool ImuFactor::Evaluate(double const *const *parameters, double *residuals,
   }
   return true;
 }
-
-QuaternionFactor::QuaternionFactor(const Eigen::Matrix4d &A,
-                                   const Eigen::Vector4d &obs)
-    : A_(A), obs_(obs){};
-
-bool QuaternionFactor::Evaluate(double const *const *parameters,
-                                double *residuals, double **jacobians) const {
-  Eigen::Map<Eigen::Vector4d> residual(residuals);
-  Eigen::Vector4d Qcb;
-  Qcb << parameters[0][0], parameters[0][1], parameters[0][2], parameters[0][3];
-
-  residual = obs_ - A_ * Qcb;
-  if (jacobians) {
-    if (jacobians[0]) {
-      Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>> jacobian_Qcb(
-          jacobians[0]);
-      jacobian_Qcb.setZero();
-      jacobian_Qcb = -1 * A_;
-    }
-  }
-  return true;
-}

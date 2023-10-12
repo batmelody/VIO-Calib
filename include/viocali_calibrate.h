@@ -1,3 +1,4 @@
+#include "calibrate_local_parameterization.h"
 #include "parameters.h"
 #include "utility/utility.h"
 #include "viocali_camera_factor.h"

@@ -2,7 +2,7 @@ CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o: \
  /home/weizhengyu/VIOCALI/src/viocali_calibrate.cpp \
  /usr/include/stdc-predef.h \
  /home/weizhengyu/VIOCALI/include/viocali_calibrate.h \
- /home/weizhengyu/VIOCALI/include/parameters.h \
+ /home/weizhengyu/VIOCALI/include/calibrate_local_parameterization.h \
  /home/weizhengyu/VIOCALI/include/utility/utility.h \
  /usr/include/c++/9/cassert \
  /usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h \
@@ -373,7 +373,94 @@ CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/statx-generic.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_statx_timestamp.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_statx.h \
- /usr/include/c++/9/fstream /usr/include/c++/9/bits/codecvt.h \
+ /usr/local/include/ceres/ceres.h \
+ /usr/local/include/ceres/autodiff_cost_function.h \
+ /usr/local/include/ceres/internal/autodiff.h \
+ /usr/local/include/ceres/jet.h /usr/include/c++/9/iostream \
+ /usr/include/eigen3/Eigen/Core /usr/local/include/ceres/fpclassify.h \
+ /usr/local/include/ceres/internal/port.h \
+ /usr/local/include/ceres/internal/config.h /usr/include/c++/9/memory \
+ /usr/include/c++/9/bits/stl_uninitialized.h \
+ /usr/include/c++/9/bits/stl_raw_storage_iter.h \
+ /usr/include/c++/9/ext/concurrence.h \
+ /usr/include/c++/9/bits/unique_ptr.h \
+ /usr/include/c++/9/bits/shared_ptr.h \
+ /usr/include/c++/9/bits/shared_ptr_base.h \
+ /usr/include/c++/9/bits/allocated_ptr.h \
+ /usr/include/c++/9/ext/aligned_buffer.h \
+ /usr/include/c++/9/bits/shared_ptr_atomic.h \
+ /usr/include/c++/9/bits/atomic_base.h \
+ /usr/include/c++/9/bits/atomic_lockfree_defines.h \
+ /usr/include/c++/9/backward/auto_ptr.h \
+ /usr/local/include/ceres/internal/eigen.h \
+ /usr/local/include/ceres/internal/fixed_array.h \
+ /usr/local/include/ceres/internal/macros.h \
+ /usr/local/include/ceres/internal/manual_constructor.h \
+ /usr/include/glog/logging.h /usr/include/unistd.h \
+ /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+ /usr/include/x86_64-linux-gnu/bits/environments.h \
+ /usr/include/x86_64-linux-gnu/bits/confname.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
+ /usr/include/c++/9/vector /usr/include/c++/9/bits/stl_vector.h \
+ /usr/include/c++/9/bits/stl_bvector.h /usr/include/c++/9/bits/vector.tcc \
+ /usr/include/inttypes.h /usr/include/gflags/gflags.h \
+ /usr/include/gflags/gflags_declare.h /usr/include/gflags/gflags_gflags.h \
+ /usr/include/glog/log_severity.h /usr/include/glog/vlog_is_on.h \
+ /usr/local/include/ceres/internal/variadic_evaluate.h \
+ /usr/local/include/ceres/types.h \
+ /usr/local/include/ceres/internal/disable_warnings.h \
+ /usr/local/include/ceres/internal/reenable_warnings.h \
+ /usr/local/include/ceres/internal/scoped_ptr.h \
+ /usr/local/include/ceres/sized_cost_function.h \
+ /usr/local/include/ceres/cost_function.h \
+ /usr/local/include/ceres/autodiff_local_parameterization.h \
+ /usr/local/include/ceres/local_parameterization.h \
+ /usr/local/include/ceres/cost_function_to_functor.h \
+ /usr/include/c++/9/numeric /usr/include/c++/9/bits/stl_numeric.h \
+ /usr/local/include/ceres/dynamic_cost_function_to_functor.h \
+ /usr/local/include/ceres/dynamic_cost_function.h \
+ /usr/local/include/ceres/covariance.h \
+ /usr/local/include/ceres/crs_matrix.h \
+ /usr/local/include/ceres/dynamic_autodiff_cost_function.h \
+ /usr/local/include/ceres/dynamic_numeric_diff_cost_function.h \
+ /usr/local/include/ceres/internal/numeric_diff.h \
+ /usr/include/eigen3/Eigen/Dense /usr/include/eigen3/Eigen/StdVector \
+ /usr/include/eigen3/Eigen/src/StlSupport/StdVector.h \
+ /usr/include/eigen3/Eigen/src/StlSupport/details.h \
+ /usr/local/include/ceres/numeric_diff_options.h \
+ /usr/local/include/ceres/gradient_problem.h \
+ /usr/local/include/ceres/gradient_problem_solver.h \
+ /usr/local/include/ceres/iteration_callback.h \
+ /usr/local/include/ceres/loss_function.h \
+ /usr/local/include/ceres/numeric_diff_cost_function.h \
+ /usr/local/include/ceres/ordered_groups.h /usr/include/c++/9/map \
+ /usr/include/c++/9/bits/stl_tree.h /usr/include/c++/9/bits/stl_map.h \
+ /usr/include/c++/9/bits/stl_multimap.h \
+ /usr/include/c++/9/bits/erase_if.h /usr/include/c++/9/set \
+ /usr/include/c++/9/bits/stl_set.h /usr/include/c++/9/bits/stl_multiset.h \
+ /usr/local/include/ceres/problem.h /usr/local/include/ceres/context.h \
+ /usr/local/include/ceres/solver.h \
+ /usr/local/include/ceres/evaluation_callback.h \
+ /usr/local/include/ceres/version.h /usr/local/include/sophus/se3.hpp \
+ /usr/local/include/sophus/so3.hpp \
+ /usr/local/include/sophus/rotation_matrix.hpp \
+ /usr/include/eigen3/Eigen/SVD /usr/local/include/sophus/types.hpp \
+ /usr/local/include/sophus/common.hpp /usr/include/c++/9/random \
+ /usr/include/c++/9/bits/random.h \
+ /usr/include/x86_64-linux-gnu/c++/9/bits/opt_random.h \
+ /usr/include/c++/9/bits/random.tcc /usr/local/include/fmt/format.h \
+ /usr/local/include/fmt/core.h /usr/include/c++/9/iterator \
+ /usr/include/c++/9/bits/stream_iterator.h \
+ /usr/local/include/fmt/ostream.h /usr/local/include/fmt/format.h \
+ /usr/local/include/sophus/so2.hpp /usr/include/eigen3/Eigen/LU \
+ /usr/include/eigen3/Eigen/src/Geometry/OrthoMethods.h \
+ /usr/include/eigen3/Eigen/src/Geometry/Quaternion.h \
+ /usr/include/eigen3/Eigen/src/Geometry/RotationBase.h \
+ /home/weizhengyu/VIOCALI/include/parameters.h /usr/include/c++/9/fstream \
+ /usr/include/c++/9/bits/codecvt.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/c++io.h \
  /usr/include/c++/9/bits/fstream.tcc \
@@ -387,18 +474,6 @@ CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o: \
  /usr/include/opencv4/opencv2/opencv_modules.hpp \
  /usr/include/opencv4/opencv2/core/cvstd.hpp \
  /usr/include/opencv4/opencv2/core/cvstd_wrapper.hpp \
- /usr/include/c++/9/memory /usr/include/c++/9/bits/stl_uninitialized.h \
- /usr/include/c++/9/bits/stl_raw_storage_iter.h \
- /usr/include/c++/9/ext/concurrence.h \
- /usr/include/c++/9/bits/unique_ptr.h \
- /usr/include/c++/9/bits/shared_ptr.h \
- /usr/include/c++/9/bits/shared_ptr_base.h \
- /usr/include/c++/9/bits/allocated_ptr.h \
- /usr/include/c++/9/ext/aligned_buffer.h \
- /usr/include/c++/9/bits/shared_ptr_atomic.h \
- /usr/include/c++/9/bits/atomic_base.h \
- /usr/include/c++/9/bits/atomic_lockfree_defines.h \
- /usr/include/c++/9/backward/auto_ptr.h \
  /usr/include/opencv4/opencv2/core/neon_utils.hpp \
  /usr/include/opencv4/opencv2/core/vsx_utils.hpp \
  /usr/include/opencv4/opencv2/core/check.hpp \
@@ -408,8 +483,6 @@ CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o: \
  /usr/include/opencv4/opencv2/core/fast_math.hpp \
  /usr/include/opencv4/opencv2/core/types.hpp /usr/include/c++/9/cfloat \
  /usr/lib/gcc/x86_64-linux-gnu/9/include/float.h \
- /usr/include/c++/9/vector /usr/include/c++/9/bits/stl_vector.h \
- /usr/include/c++/9/bits/stl_bvector.h /usr/include/c++/9/bits/vector.tcc \
  /usr/include/opencv4/opencv2/core/mat.hpp \
  /usr/include/opencv4/opencv2/core/bufferpool.hpp \
  /usr/include/opencv4/opencv2/core/mat.inl.hpp \
@@ -435,10 +508,7 @@ CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o: \
  /usr/include/opencv4/opencv2/dnn/dnn.hpp \
  /usr/include/opencv4/opencv2/core/async.hpp \
  /usr/include/opencv4/opencv2/dnn/version.hpp \
- /usr/include/opencv4/opencv2/dnn/dict.hpp /usr/include/c++/9/map \
- /usr/include/c++/9/bits/stl_tree.h /usr/include/c++/9/bits/stl_map.h \
- /usr/include/c++/9/bits/stl_multimap.h \
- /usr/include/c++/9/bits/erase_if.h \
+ /usr/include/opencv4/opencv2/dnn/dict.hpp \
  /usr/include/opencv4/opencv2/dnn/layer.hpp \
  /usr/include/opencv4/opencv2/dnn/dnn.inl.hpp \
  /usr/include/opencv4/opencv2/dnn/utils/inference_engine.hpp \
@@ -449,11 +519,10 @@ CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o: \
  /usr/include/opencv4/opencv2/flann/matrix.h \
  /usr/include/opencv4/opencv2/flann/params.h \
  /usr/include/opencv4/opencv2/flann/any.h \
- /usr/include/opencv4/opencv2/flann/defines.h /usr/include/c++/9/iostream \
+ /usr/include/opencv4/opencv2/flann/defines.h \
  /usr/include/opencv4/opencv2/flann/saving.h \
  /usr/include/opencv4/opencv2/flann/nn_index.h \
- /usr/include/opencv4/opencv2/flann/result_set.h /usr/include/c++/9/set \
- /usr/include/c++/9/bits/stl_set.h /usr/include/c++/9/bits/stl_multiset.h \
+ /usr/include/opencv4/opencv2/flann/result_set.h \
  /usr/include/opencv4/opencv2/flann/all_indices.h \
  /usr/include/opencv4/opencv2/flann/kdtree_index.h \
  /usr/include/opencv4/opencv2/flann/dynamic_bitset.h \
@@ -546,60 +615,7 @@ CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o: \
  /usr/include/opencv4/opencv2/viz/viz3d.hpp \
  /usr/include/opencv4/opencv2/viz/vizcore.hpp \
  /home/weizhengyu/VIOCALI/include/viocali_camera_factor.h \
- /usr/local/include/ceres/ceres.h \
- /usr/local/include/ceres/autodiff_cost_function.h \
- /usr/local/include/ceres/internal/autodiff.h \
- /usr/local/include/ceres/jet.h /usr/include/eigen3/Eigen/Core \
- /usr/local/include/ceres/fpclassify.h \
- /usr/local/include/ceres/internal/port.h \
- /usr/local/include/ceres/internal/config.h \
- /usr/local/include/ceres/internal/eigen.h \
- /usr/local/include/ceres/internal/fixed_array.h \
- /usr/local/include/ceres/internal/macros.h \
- /usr/local/include/ceres/internal/manual_constructor.h \
- /usr/include/glog/logging.h /usr/include/unistd.h \
- /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
- /usr/include/x86_64-linux-gnu/bits/environments.h \
- /usr/include/x86_64-linux-gnu/bits/confname.h \
- /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
- /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
- /usr/include/x86_64-linux-gnu/bits/unistd.h \
- /usr/include/x86_64-linux-gnu/bits/unistd_ext.h /usr/include/inttypes.h \
- /usr/include/gflags/gflags.h /usr/include/gflags/gflags_declare.h \
- /usr/include/gflags/gflags_gflags.h /usr/include/glog/log_severity.h \
- /usr/include/glog/vlog_is_on.h \
- /usr/local/include/ceres/internal/variadic_evaluate.h \
- /usr/local/include/ceres/types.h \
- /usr/local/include/ceres/internal/disable_warnings.h \
- /usr/local/include/ceres/internal/reenable_warnings.h \
- /usr/local/include/ceres/internal/scoped_ptr.h \
- /usr/local/include/ceres/sized_cost_function.h \
- /usr/local/include/ceres/cost_function.h \
- /usr/local/include/ceres/autodiff_local_parameterization.h \
- /usr/local/include/ceres/local_parameterization.h \
- /usr/local/include/ceres/cost_function_to_functor.h \
- /usr/include/c++/9/numeric /usr/include/c++/9/bits/stl_numeric.h \
- /usr/local/include/ceres/dynamic_cost_function_to_functor.h \
- /usr/local/include/ceres/dynamic_cost_function.h \
- /usr/local/include/ceres/covariance.h \
- /usr/local/include/ceres/crs_matrix.h \
- /usr/local/include/ceres/dynamic_autodiff_cost_function.h \
- /usr/local/include/ceres/dynamic_numeric_diff_cost_function.h \
- /usr/local/include/ceres/internal/numeric_diff.h \
- /usr/include/eigen3/Eigen/Dense /usr/include/eigen3/Eigen/StdVector \
- /usr/include/eigen3/Eigen/src/StlSupport/StdVector.h \
- /usr/include/eigen3/Eigen/src/StlSupport/details.h \
- /usr/local/include/ceres/numeric_diff_options.h \
- /usr/local/include/ceres/gradient_problem.h \
- /usr/local/include/ceres/gradient_problem_solver.h \
- /usr/local/include/ceres/iteration_callback.h \
- /usr/local/include/ceres/loss_function.h \
- /usr/local/include/ceres/numeric_diff_cost_function.h \
- /usr/local/include/ceres/ordered_groups.h \
- /usr/local/include/ceres/problem.h /usr/local/include/ceres/context.h \
- /usr/local/include/ceres/solver.h \
- /usr/local/include/ceres/evaluation_callback.h \
- /usr/local/include/ceres/version.h /usr/local/include/ceres/rotation.h \
+ /usr/local/include/ceres/rotation.h \
  /home/weizhengyu/VIOCALI/include/utility/tic_toc.h \
  /usr/include/boost/shared_ptr.hpp \
  /usr/include/boost/smart_ptr/shared_ptr.hpp \
@@ -651,19 +667,5 @@ CMakeFiles/viocali_estimator.dir/src/viocali_calibrate.cpp.o: \
  /usr/include/opencv4/opencv2/calib3d/calib3d.hpp \
  /usr/include/opencv4/opencv2/core/core.hpp \
  /usr/include/opencv4/opencv2/imgproc/imgproc.hpp \
- /usr/local/include/sophus/se3.hpp /usr/local/include/sophus/so3.hpp \
- /usr/local/include/sophus/rotation_matrix.hpp \
- /usr/include/eigen3/Eigen/SVD /usr/local/include/sophus/types.hpp \
- /usr/local/include/sophus/common.hpp /usr/include/c++/9/random \
- /usr/include/c++/9/bits/random.h \
- /usr/include/x86_64-linux-gnu/c++/9/bits/opt_random.h \
- /usr/include/c++/9/bits/random.tcc /usr/local/include/fmt/format.h \
- /usr/local/include/fmt/core.h /usr/include/c++/9/iterator \
- /usr/include/c++/9/bits/stream_iterator.h \
- /usr/local/include/fmt/ostream.h /usr/local/include/fmt/format.h \
- /usr/local/include/sophus/so2.hpp /usr/include/eigen3/Eigen/LU \
- /usr/include/eigen3/Eigen/src/Geometry/OrthoMethods.h \
- /usr/include/eigen3/Eigen/src/Geometry/Quaternion.h \
- /usr/include/eigen3/Eigen/src/Geometry/RotationBase.h \
  /home/weizhengyu/VIOCALI/include/viocali_imu_factor.h \
  /usr/include/c++/9/condition_variable /usr/include/c++/9/thread

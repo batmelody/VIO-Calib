@@ -528,7 +528,7 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/include/opencv4/opencv2/viz/viz3d.hpp \
  /usr/include/opencv4/opencv2/viz/vizcore.hpp \
  /home/weizhengyu/VIOCALI/include/viocali_calibrate.h \
- /home/weizhengyu/VIOCALI/include/parameters.h \
+ /home/weizhengyu/VIOCALI/include/calibrate_local_parameterization.h \
  /home/weizhengyu/VIOCALI/include/utility/utility.h \
  /usr/include/eigen3/Eigen/Dense /usr/include/libgen.h \
  /usr/include/x86_64-linux-gnu/sys/stat.h \
@@ -545,8 +545,6 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/statx-generic.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_statx_timestamp.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_statx.h \
- /usr/include/opencv4/opencv2/core/eigen.hpp \
- /home/weizhengyu/VIOCALI/include/viocali_camera_factor.h \
  /usr/local/include/ceres/ceres.h \
  /usr/local/include/ceres/autodiff_cost_function.h \
  /usr/local/include/ceres/internal/autodiff.h \
@@ -600,7 +598,25 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/local/include/ceres/problem.h /usr/local/include/ceres/context.h \
  /usr/local/include/ceres/solver.h \
  /usr/local/include/ceres/evaluation_callback.h \
- /usr/local/include/ceres/version.h /usr/local/include/ceres/rotation.h \
+ /usr/local/include/ceres/version.h /usr/local/include/sophus/se3.hpp \
+ /usr/local/include/sophus/so3.hpp \
+ /usr/local/include/sophus/rotation_matrix.hpp \
+ /usr/include/eigen3/Eigen/SVD /usr/local/include/sophus/types.hpp \
+ /usr/local/include/sophus/common.hpp /usr/include/c++/9/random \
+ /usr/include/c++/9/bits/random.h \
+ /usr/include/x86_64-linux-gnu/c++/9/bits/opt_random.h \
+ /usr/include/c++/9/bits/random.tcc /usr/local/include/fmt/format.h \
+ /usr/local/include/fmt/core.h /usr/include/c++/9/iterator \
+ /usr/include/c++/9/bits/stream_iterator.h \
+ /usr/local/include/fmt/ostream.h /usr/local/include/fmt/format.h \
+ /usr/local/include/sophus/so2.hpp /usr/include/eigen3/Eigen/LU \
+ /usr/include/eigen3/Eigen/src/Geometry/OrthoMethods.h \
+ /usr/include/eigen3/Eigen/src/Geometry/Quaternion.h \
+ /usr/include/eigen3/Eigen/src/Geometry/RotationBase.h \
+ /home/weizhengyu/VIOCALI/include/parameters.h \
+ /usr/include/opencv4/opencv2/core/eigen.hpp \
+ /home/weizhengyu/VIOCALI/include/viocali_camera_factor.h \
+ /usr/local/include/ceres/rotation.h \
  /home/weizhengyu/VIOCALI/include/utility/tic_toc.h \
  /usr/include/boost/shared_ptr.hpp \
  /usr/include/boost/smart_ptr/shared_ptr.hpp \
@@ -652,19 +668,5 @@ CMakeFiles/viocali_estimator.dir/viocali_imu_camera_node.cpp.o: \
  /usr/include/opencv4/opencv2/calib3d/calib3d.hpp \
  /usr/include/opencv4/opencv2/core/core.hpp \
  /usr/include/opencv4/opencv2/imgproc/imgproc.hpp \
- /usr/local/include/sophus/se3.hpp /usr/local/include/sophus/so3.hpp \
- /usr/local/include/sophus/rotation_matrix.hpp \
- /usr/include/eigen3/Eigen/SVD /usr/local/include/sophus/types.hpp \
- /usr/local/include/sophus/common.hpp /usr/include/c++/9/random \
- /usr/include/c++/9/bits/random.h \
- /usr/include/x86_64-linux-gnu/c++/9/bits/opt_random.h \
- /usr/include/c++/9/bits/random.tcc /usr/local/include/fmt/format.h \
- /usr/local/include/fmt/core.h /usr/include/c++/9/iterator \
- /usr/include/c++/9/bits/stream_iterator.h \
- /usr/local/include/fmt/ostream.h /usr/local/include/fmt/format.h \
- /usr/local/include/sophus/so2.hpp /usr/include/eigen3/Eigen/LU \
- /usr/include/eigen3/Eigen/src/Geometry/OrthoMethods.h \
- /usr/include/eigen3/Eigen/src/Geometry/Quaternion.h \
- /usr/include/eigen3/Eigen/src/Geometry/RotationBase.h \
  /home/weizhengyu/VIOCALI/include/viocali_imu_factor.h \
  /usr/include/c++/9/condition_variable /usr/include/c++/9/thread

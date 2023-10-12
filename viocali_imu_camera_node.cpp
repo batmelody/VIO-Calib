@@ -189,8 +189,6 @@ int run_for_synthesis_data() {
   fs["imu_dir"] >> imuFileName;
   fs["cam_dir"] >> camFileName;
 
-  std::cout << " squareSize " << squareSize << std::endl;
-
   Camera::ModelType modelType = Camera::ModelType::PINHOLE;
   std::vector<std::vector<cv::Point3f>> world_corner;
   std::vector<std::vector<cv::Point2f>> image_corner;

@@ -69,12 +69,33 @@ public:
   ImuIntegration *PreIntegration;
 };
 
-class QuaternionFactor : public ceres::SizedCostFunction<4, 4> {
+class CamIMUFactor {
 public:
-  QuaternionFactor(const Eigen::Matrix4d &A, const Eigen::Vector4d &obs);
-  virtual bool Evaluate(double const *const *parameters, double *residuals,
-                        double **jacobians) const;
+  CamIMUFactor(const Eigen::Quaterniond &Qc, const Eigen::Quaterniond &Qb)
+      : Qc_(Qc), Qb_(Qb) {}
 
-  Eigen::Matrix4d A_;
-  Eigen::Vector4d obs_;
+  template <typename T>
+  bool operator()(const T *const qbc, T *residuals) const {
+    Eigen::Quaternion<T> Qc__;
+    Qc__.w() = T(Qc_.w());
+    Qc__.x() = T(Qc_.x());
+    Qc__.y() = T(Qc_.y());
+    Qc__.z() = T(Qc_.z());
+
+    Eigen::Quaternion<T> Qb__;
+    Qb__.w() = T(Qb_.w());
+    Qb__.x() = T(Qb_.x());
+    Qb__.y() = T(Qb_.y());
+    Qb__.z() = T(Qb_.z());
+
+    Eigen::Quaternion<T> Qbc = Eigen::Quaternion<T>(qbc);
+    Eigen::Matrix<T, 3, 1> res =
+        (Qb__.inverse() * (Qbc * Qc__ * Qbc.inverse())).vec();
+    residuals[0] = res.x();
+    residuals[1] = res.y();
+    residuals[2] = res.z();
+    return true;
+  }
+  Eigen::Quaterniond Qc_;
+  Eigen::Quaterniond Qb_;
 };
