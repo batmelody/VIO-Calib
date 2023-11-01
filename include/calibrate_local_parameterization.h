@@ -69,3 +69,24 @@ class IntrinsicLocalParameterization : public ceres::LocalParameterization {
   virtual int GlobalSize() const { return 4; };
   virtual int LocalSize() const { return 4; };
 };
+
+class ExRLocalParameterization : public ceres::LocalParameterization {
+  virtual bool Plus(const double *x, const double *delta,
+                    double *x_plus_delta) const override {
+    const Eigen::Map<const Eigen::Matrix<double, 3, 1>> phi(x);
+    const Eigen::Map<const Eigen::Matrix<double, 3, 1>> delta_phi(delta);
+    Eigen::Map<Eigen::Matrix<double, 3, 1>> x_plus_delta_phi(x_plus_delta);
+    Sophus::SO3d R = Sophus::SO3d::exp(phi);
+    Sophus::SO3d delta_R = Sophus::SO3d::exp(delta_phi);
+    x_plus_delta_phi = (R * delta_R).log();
+    return true;
+  }
+
+  virtual bool ComputeJacobian(const double *x,
+                               double *jacobian) const override {
+    ceres::MatrixRef(jacobian, 3, 3) = ceres::Matrix::Identity(3, 3);
+    return true;
+  }
+  virtual int GlobalSize() const { return 3; };
+  virtual int LocalSize() const { return 3; };
+};

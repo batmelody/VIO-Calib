@@ -320,3 +320,27 @@ bool ImuFactor::Evaluate(double const *const *parameters, double *residuals,
   }
   return true;
 }
+
+ExRFactor::ExRFactor(const Eigen::Matrix3d &_R_c, const Eigen::Matrix3d &_R_b)
+    : Rc(_R_c), Rb(_R_b){};
+
+bool ExRFactor::Evaluate(double const *const *parameters, double *residuals,
+                         double **jacobians) const {
+  Eigen::Map<Eigen::Vector3d> residual(residuals);
+  Eigen::Vector3d p(1, 1, 1);
+  Sophus::Vector3d phi;
+  phi << parameters[0][0], parameters[0][1], parameters[0][2];
+  Sophus::SO3d R = Sophus::SO3d::exp(phi);
+  Eigen::Matrix3d Rbc = R.matrix();
+  residual = Rc * p - Rbc.transpose() * Rb * Rbc * p;
+  if (jacobians) {
+    if (jacobians[0]) {
+      Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> jacobian_R(
+          jacobians[0]);
+      jacobian_R =
+          -1 * (-Rbc.transpose() * Rb * Rbc * Utility::skewSymmetric(p) +
+                Utility::skewSymmetric(Rbc.transpose() * Rb * Rbc * p));
+    }
+  }
+  return true;
+}

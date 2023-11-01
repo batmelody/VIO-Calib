@@ -6,6 +6,8 @@
 #include <mutex>
 #include <opencv2/opencv.hpp>
 #include <queue>
+#include <sophus/se3.hpp>
+#include <sophus/so3.hpp>
 #include <stdio.h>
 #include <thread>
 
@@ -68,7 +70,14 @@ public:
                         double **jacobians) const;
   ImuIntegration *PreIntegration;
 };
+class ExRFactor : public ceres::SizedCostFunction<3, 3> {
+public:
+  ExRFactor(const Eigen::Matrix3d &_R_c, const Eigen::Matrix3d &_R_b);
+  virtual bool Evaluate(double const *const *parameters, double *residuals,
+                        double **jacobians) const;
 
+  Eigen::Matrix3d Rc, Rb;
+};
 class CamIMUFactor {
 public:
   CamIMUFactor(const Eigen::Quaterniond &Qc, const Eigen::Quaterniond &Qb)

@@ -35,7 +35,6 @@ bool ExtrinsicOnlyFactor::Evaluate(double const *const *parameters,
   double x = pts_j_pre[0];
   double y = pts_j_pre[1];
   double z = pts_j_pre[2];
-
   if (jacobians) {
     if (jacobians[0]) {
       Eigen::Map<Eigen::Matrix<double, 3, 6, Eigen::RowMajor>> jacobian_pose_i(

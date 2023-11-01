@@ -77,7 +77,7 @@ DataSynthesis(std::queue<ImuData> imu_buffer, std::queue<ImageData> img_buffer,
   return measurements;
 }
 
-int run_for_real_data() {
+int RunForRealData() {
   const std::string imufilename =
       "/home/weizhengyu/Data/rs/imu0.csv"; // 替换为你的CSV文件名
   const std::string imgfilename =
@@ -154,9 +154,6 @@ int run_for_real_data() {
   std::vector<Eigen::Matrix3d> Rcw = viocali->GetCamRotation();
   viocali->SolveCamDeltaR(Rcw, delta_R_cam);
   delta_R_imu = viocali->GetImuRotation();
-
-  viocali->ExtrinsicROptimizer(delta_R_cam, delta_R_imu);
-
   if (viocali->CalibrateExtrinsicR(delta_R_cam, delta_R_imu, viocali->ric)) {
     std::cout << " success " << std::endl;
   } else {
@@ -166,7 +163,7 @@ int run_for_real_data() {
   return 0;
 }
 
-int run_for_synthesis_data() {
+int RunForSynthesisData() {
   /*init parameters*/
   cv::FileStorage fs("../config/vio-config.yaml", cv::FileStorage::READ);
   if (!fs.isOpened()) {
@@ -210,14 +207,11 @@ int run_for_synthesis_data() {
   std::ofstream save_points;
   save_points.open(SAVE_DIR);
   for (auto &mes : Mes) {
-    std::cout << "FrameCount: " << viocali->FrameCount_ << std::endl;
     for (auto &imu : mes.first) {
       double imu_t = imu.timestamp;
       double cam_t = mes.second.timestamp;
       if (imu_t <= cam_t) {
         double dt = imu_t - current_time;
-        std::cout << "imu_t: " << imu_t << " cam_t: " << cam_t << " dt: " << dt
-                  << std::endl;
         current_time = imu_t;
         viocali->IMULocalization(dt, imu.acc, imu.gyro);
       } else {
@@ -232,7 +226,6 @@ int run_for_synthesis_data() {
         double rx = w1 * rx + w2 * imu.gyro.x();
         double ry = w1 * ry + w2 * imu.gyro.y();
         double rz = w1 * rz + w2 * imu.gyro.z();
-        std::cout << "tail dt: " << dt_1 << std::endl;
         viocali->IMULocalization(dt_1, Eigen::Vector3d(dx, dy, dz),
                                  Eigen::Vector3d(rx, ry, rz));
       }
@@ -251,14 +244,15 @@ int run_for_synthesis_data() {
   viocali->SolveCamDeltaR(Rwc, delta_R_cam);
   delta_R_imu.clear();
   delta_R_imu = viocali->GetImuRotation();
-  viocali->ExtrinsicROptimizer(delta_R_cam, delta_R_imu);
-  if (viocali->CalibrateExtrinsicR(delta_R_cam, delta_R_imu, viocali->ric)) {
-    std::cout << " success " << std::endl;
-  } else {
-    std::cout << "false " << std::endl;
-  }
+  double Qic[4];
+  viocali->ValidOptimizer(delta_R_cam, delta_R_imu, Qic);
+  // if (viocali->CalibrateExtrinsicR(delta_R_cam, delta_R_imu, viocali->ric)) {
+  //   std::cout << " success " << std::endl;
+  // } else {
+  //   std::cout << "false " << std::endl;
+  // }
   delete viocali;
   return 0;
 }
 
-int main() { run_for_synthesis_data(); }
+int main() { RunForSynthesisData(); }

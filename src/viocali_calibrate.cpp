@@ -64,9 +64,9 @@ bool Viocalibrate::CameraLocalization(
   return true;
 }
 
-void Viocalibrate::ExtrinsicROptimizer(
-    std::vector<Eigen::Matrix3d> delta_R_cam,
-    std::vector<Eigen::Matrix3d> delta_R_imu) {
+void Viocalibrate::ExtrinsicROptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
+                                       std::vector<Eigen::Matrix3d> delta_R_imu,
+                                       double Qbc[4]) {
   ric = Eigen::Matrix3d::Identity();
 
   for (int i = 0; i < WINDOW_SIZE - 1; i++) {
@@ -77,7 +77,6 @@ void Viocalibrate::ExtrinsicROptimizer(
   ceres::Problem problem;
   ceres::LossFunction *loss_function;
   loss_function = new ceres::CauchyLoss(1.0);
-  double Qbc[4];
   Qbc[0] = 0.7;
   Qbc[1] = 0.2;
   Qbc[2] = 0.6;
@@ -85,7 +84,9 @@ void Viocalibrate::ExtrinsicROptimizer(
 
   ceres::LocalParameterization *local_parameterization_intrinsic =
       new ceres::EigenQuaternionParameterization();
+
   problem.AddParameterBlock(Qbc, 4, local_parameterization_intrinsic);
+
   for (int i = 1; i < WINDOW_SIZE - 1; i++) {
     ceres::CostFunction *costFunction =
         new ceres::AutoDiffCostFunction<CamIMUFactor, 3, 4>(
@@ -93,6 +94,7 @@ void Viocalibrate::ExtrinsicROptimizer(
                              Eigen::Quaterniond(delta_R_imu[i])));
     problem.AddResidualBlock(costFunction, loss_function, Qbc);
   }
+
   std::cout << "WINDOW_SIZE: " << WINDOW_SIZE << std::endl;
   ceres::Solver::Options options;
   options.minimizer_progress_to_stdout = true;
@@ -112,16 +114,6 @@ void Viocalibrate::ExtrinsicROptimizer(
 bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
                                        std::vector<Eigen::Matrix3d> delta_R_imu,
                                        Eigen::Matrix3d &calib_ric_result) {
-
-  // Eigen::Matrix3d Rbc;
-  // Rbc << 0, 0, 1, 1, 0, 0, 0, 1, 0;
-  // Eigen::Quaterniond Qbc(Rbc);
-  // Eigen::Quaterniond Qc(delta_R_cam[0]);
-  // Eigen::Quaterniond Qb(delta_R_imu[0]);
-
-  // Eigen::Quaterniond Qres;
-  // Qres = Qb.inverse() * (Qbc * Qc * Qbc.inverse());
-
   ric = Eigen::Matrix3d::Identity();
   for (int i = 0; i < WINDOW_SIZE - 1; i++) {
     Rc.push_back(delta_R_cam[i]);
@@ -156,15 +148,14 @@ bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
   Eigen::Matrix<double, 4, 1> x = svd.matrixV().col(3);
   Eigen::Quaterniond estimated_R(x);
   ric = estimated_R.toRotationMatrix().inverse();
-  Eigen::Vector3d ric_cov;
-  ric_cov = svd.singularValues().tail<3>();
-  std::cout << "ric: " << std::endl << ric << std::endl;
-  if (ric_cov(1) > 0.25) {
-    calib_ric_result = ric;
-    return true;
-  } else {
-    return false;
-  }
+  Eigen::Quaterniond Qic(ric);
+  double Qbc[4];
+  Qbc[0] = Qic.w();
+  Qbc[1] = Qic.x();
+  Qbc[2] = Qic.y();
+  Qbc[3] = Qic.z();
+  ExtrinsicROptimizer(delta_R_cam, delta_R_imu, Qbc);
+  return true;
 }
 
 void Viocalibrate::SolveCamDeltaR(std::vector<Eigen::Matrix3d> &Rwc,
@@ -192,16 +183,71 @@ void Viocalibrate::InitState() {
   Imu_g = {0, 0, 9.81};
 }
 
-bool Viocalibrate::ExtrinsicValidation(std::vector<Eigen::Matrix3d> delta_R_cam,
-                                       std::vector<Eigen::Matrix3d> delta_R_imu,
-                                       Eigen::Matrix3d &calib_ric_result) {
+bool Viocalibrate::QuaternionValidation(
+    std::vector<Eigen::Matrix3d> delta_R_cam,
+    std::vector<Eigen::Matrix3d> delta_R_imu,
+    Eigen::Matrix3d &calib_ric_result) {
 
-  for (int i = 0; i < delta_R_cam.size(); i++) {
-    std::cout << "imu: " << std::endl
-              << delta_R_imu[i] * calib_ric_result << std::endl;
-    std::cout << "cam: " << std::endl
-              << calib_ric_result * delta_R_cam[i] << std::endl;
-  }
-  std::cout << "ric: " << std::endl << calib_ric_result << std::endl;
+  Eigen::Matrix3d Rbc;
+  Rbc << 0, 0, 1, 1, 0, 0, 0, 1, 0;
+  Eigen::Quaterniond Qbc(Rbc);
+  Eigen::Quaterniond Qc(delta_R_cam[0]);
+  Eigen::Quaterniond Qb(delta_R_imu[0]);
+  Eigen::Quaterniond Qres;
+  Qres = Qb.inverse() * (Qbc * Qc * Qbc.inverse());
+  std::cout << "Qres: " << Qres.w() << " " << Qres.x() << " " << Qres.y() << " "
+            << Qres.z() << std::endl;
+  std::cout << "Qres vec: " << Qres.vec() << std::endl;
+
+  Eigen::Matrix4d L, R, LL;
+  L = Utility::Qleft(Qbc);
+  R = Utility::Qright(Qbc.inverse());
+  LL = Utility::Qleft(Qb.inverse());
+  Eigen::Vector4d Qcv(Qc.w(), Qc.x(), Qc.y(), Qc.z());
+  Eigen::Matrix<double, 3, 4> submatrix = (LL * L * R).block<3, 4>(1, 0);
+  std::cout << " submatrix " << submatrix * Qcv << std::endl;
+  // Eigen::Quaterniond Qbv(Qcv.x(), Qcv.y(), Qcv.z(), Qcv.w());
+  std::cout << Qcv << std::endl;
+
   return true;
+}
+
+void Viocalibrate::ValidOptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
+                                  std::vector<Eigen::Matrix3d> delta_R_imu,
+                                  double Qb_c[4]) {
+
+  ceres::Problem problem;
+  ceres::LossFunction *loss_function;
+  loss_function = new ceres::CauchyLoss(1.0);
+  double phi_b_c[1][3];
+  phi_b_c[0][0] = 1.20919958;
+  phi_b_c[0][1] = 1.20919958;
+  phi_b_c[0][2] = 1.20919958;
+
+  ExRLocalParameterization *local_parameterization_intrinsic =
+      new ExRLocalParameterization();
+  problem.AddParameterBlock(phi_b_c[0], 3, local_parameterization_intrinsic);
+
+  Eigen::Matrix3d Rbc;
+  Rbc << 0, 0, 1, 1, 0, 0, 0, 1, 0;
+
+  for (int i = 1; i < WINDOW_SIZE - 1; i++) {
+    ceres::CostFunction *costFunction =
+        new ExRFactor(delta_R_cam[i], delta_R_imu[i]);
+    problem.AddResidualBlock(costFunction, loss_function, phi_b_c[0]);
+  }
+  std::cout << "WINDOW_SIZE: " << WINDOW_SIZE << std::endl;
+  ceres::Solver::Options options;
+  options.minimizer_progress_to_stdout = true;
+  options.use_nonmonotonic_steps = true;
+  options.max_num_iterations = 100;
+  options.function_tolerance = 1e-9;
+  options.gradient_tolerance = 1e-9;
+  options.parameter_tolerance = 1e-9;
+  ceres::Solver::Summary summary;
+  ceres::Solve(options, &problem, &summary);
+  std::cout << summary.BriefReport() << std::endl;
+  for (int i = 0; i < 3; i++) {
+    std::cout << "phi_b_c: " << phi_b_c[0][i] << std::endl;
+  }
 }

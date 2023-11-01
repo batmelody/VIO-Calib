@@ -599,4 +599,18 @@ CMakeFiles/viocali_estimator.dir/src/viocali_imu_factor.cpp.o: \
  /usr/local/include/ceres/solver.h \
  /usr/local/include/ceres/evaluation_callback.h \
  /usr/local/include/ceres/version.h /usr/include/c++/9/condition_variable \
+ /usr/local/include/sophus/se3.hpp /usr/local/include/sophus/so3.hpp \
+ /usr/local/include/sophus/rotation_matrix.hpp \
+ /usr/include/eigen3/Eigen/SVD /usr/local/include/sophus/types.hpp \
+ /usr/local/include/sophus/common.hpp /usr/include/c++/9/random \
+ /usr/include/c++/9/bits/random.h \
+ /usr/include/x86_64-linux-gnu/c++/9/bits/opt_random.h \
+ /usr/include/c++/9/bits/random.tcc /usr/local/include/fmt/format.h \
+ /usr/local/include/fmt/core.h /usr/include/c++/9/iterator \
+ /usr/include/c++/9/bits/stream_iterator.h \
+ /usr/local/include/fmt/ostream.h /usr/local/include/fmt/format.h \
+ /usr/local/include/sophus/so2.hpp /usr/include/eigen3/Eigen/LU \
+ /usr/include/eigen3/Eigen/src/Geometry/OrthoMethods.h \
+ /usr/include/eigen3/Eigen/src/Geometry/Quaternion.h \
+ /usr/include/eigen3/Eigen/src/Geometry/RotationBase.h \
  /usr/include/c++/9/thread
