@@ -95,7 +95,6 @@ void Viocalibrate::ExtrinsicROptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
     problem.AddResidualBlock(costFunction, loss_function, Qbc);
   }
 
-  std::cout << "WINDOW_SIZE: " << WINDOW_SIZE << std::endl;
   ceres::Solver::Options options;
   options.minimizer_progress_to_stdout = true;
   options.use_nonmonotonic_steps = true;
@@ -106,9 +105,10 @@ void Viocalibrate::ExtrinsicROptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.BriefReport() << std::endl;
-  for (int i = 0; i < 4; i++) {
-    std::cout << "Qbc: " << Qbc[i] << std::endl;
-  }
+  Eigen::Quaterniond resQbc(Qbc[0], Qbc[1], Qbc[2], Qbc[3]);
+  Sophus::SO3d SO3_q(resQbc);
+  Sophus::Vector3d so3 = SO3_q.log();
+  std::cout << "so3 = " << so3.transpose() << std::endl;
 }
 
 bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
@@ -183,60 +183,48 @@ void Viocalibrate::InitState() {
   Imu_g = {0, 0, 9.81};
 }
 
-bool Viocalibrate::QuaternionValidation(
+bool Viocalibrate::CalCulateValidation(
     std::vector<Eigen::Matrix3d> delta_R_cam,
-    std::vector<Eigen::Matrix3d> delta_R_imu,
-    Eigen::Matrix3d &calib_ric_result) {
+    std::vector<Eigen::Matrix3d> delta_R_imu) {
 
   Eigen::Matrix3d Rbc;
   Rbc << 0, 0, 1, 1, 0, 0, 0, 1, 0;
-  Eigen::Quaterniond Qbc(Rbc);
-  Eigen::Quaterniond Qc(delta_R_cam[0]);
-  Eigen::Quaterniond Qb(delta_R_imu[0]);
-  Eigen::Quaterniond Qres;
-  Qres = Qb.inverse() * (Qbc * Qc * Qbc.inverse());
-  std::cout << "Qres: " << Qres.w() << " " << Qres.x() << " " << Qres.y() << " "
-            << Qres.z() << std::endl;
-  std::cout << "Qres vec: " << Qres.vec() << std::endl;
+  Eigen::AngleAxisd angle_axis(Rbc);
 
-  Eigen::Matrix4d L, R, LL;
-  L = Utility::Qleft(Qbc);
-  R = Utility::Qright(Qbc.inverse());
-  LL = Utility::Qleft(Qb.inverse());
-  Eigen::Vector4d Qcv(Qc.w(), Qc.x(), Qc.y(), Qc.z());
-  Eigen::Matrix<double, 3, 4> submatrix = (LL * L * R).block<3, 4>(1, 0);
-  std::cout << " submatrix " << submatrix * Qcv << std::endl;
-  // Eigen::Quaterniond Qbv(Qcv.x(), Qcv.y(), Qcv.z(), Qcv.w());
-  std::cout << Qcv << std::endl;
+  double theta = angle_axis.angle();
+  Eigen::Vector3d rotation_vector = angle_axis.axis();
+
+  std::cout << "Rotation angle (in radians):\n" << theta << std::endl;
+  std::cout << "Rotation vector:\n" << rotation_vector << std::endl;
 
   return true;
 }
 
 void Viocalibrate::ValidOptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
-                                  std::vector<Eigen::Matrix3d> delta_R_imu,
-                                  double Qb_c[4]) {
+                                  std::vector<Eigen::Matrix3d> delta_R_imu) {
 
   ceres::Problem problem;
   ceres::LossFunction *loss_function;
   loss_function = new ceres::CauchyLoss(1.0);
-  double phi_b_c[1][3];
-  phi_b_c[0][0] = 1.20919958;
-  phi_b_c[0][1] = 1.20919958;
-  phi_b_c[0][2] = 1.20919958;
 
+  double Qbc[1][3];
+  Qbc[0][0] = 0.4;
+  Qbc[0][1] = 0.6;
+  Qbc[0][2] = 0.55;
+
+  Eigen::Vector3d phi(1.2092, -1.2092, 1.2092);
+  Sophus::SO3d Rbc_SO3 = Sophus::SO3d::exp(phi);
+  Eigen::Matrix3d Rbc = Rbc_SO3.matrix();
   ExRLocalParameterization *local_parameterization_intrinsic =
       new ExRLocalParameterization();
-  problem.AddParameterBlock(phi_b_c[0], 3, local_parameterization_intrinsic);
-
-  Eigen::Matrix3d Rbc;
-  Rbc << 0, 0, 1, 1, 0, 0, 0, 1, 0;
+  problem.AddParameterBlock(Qbc[0], 3, local_parameterization_intrinsic);
 
   for (int i = 1; i < WINDOW_SIZE - 1; i++) {
     ceres::CostFunction *costFunction =
-        new ExRFactor(delta_R_cam[i], delta_R_imu[i]);
-    problem.AddResidualBlock(costFunction, loss_function, phi_b_c[0]);
+        new ExRFactor(delta_R_cam[i], Rbc.inverse() * delta_R_cam[i] * Rbc);
+    problem.AddResidualBlock(costFunction, loss_function, Qbc[0]);
   }
-  std::cout << "WINDOW_SIZE: " << WINDOW_SIZE << std::endl;
+
   ceres::Solver::Options options;
   options.minimizer_progress_to_stdout = true;
   options.use_nonmonotonic_steps = true;
@@ -248,6 +236,6 @@ void Viocalibrate::ValidOptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.BriefReport() << std::endl;
   for (int i = 0; i < 3; i++) {
-    std::cout << "phi_b_c: " << phi_b_c[0][i] << std::endl;
+    std::cout << Qbc[0][i] << " ";
   }
 }

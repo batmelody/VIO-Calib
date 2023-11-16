@@ -324,22 +324,48 @@ bool ImuFactor::Evaluate(double const *const *parameters, double *residuals,
 ExRFactor::ExRFactor(const Eigen::Matrix3d &_R_c, const Eigen::Matrix3d &_R_b)
     : Rc(_R_c), Rb(_R_b){};
 
+// /*useful process*/
+// bool ExRFactor::Evaluate(double const *const *parameters, double *residuals,
+//                          double **jacobians) const {
+//   Eigen::Map<Eigen::Vector3d> residual(residuals);
+//   Eigen::Vector3d p(1, 1, 1);
+//   Sophus::Vector3d phi;
+//   phi << parameters[0][0], parameters[0][1], parameters[0][2];
+//   Sophus::SO3d R = Sophus::SO3d::exp(phi);
+//   Eigen::Matrix3d Rbc = R.matrix();
+//   residual = Rc * p - Rbc.transpose() * Rb * Rbc * p;
+//   if (jacobians) {
+//     if (jacobians[0]) {
+//       Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> jacobian_R(
+//           jacobians[0]);
+//       jacobian_R =
+//           -1 * (-Rbc.transpose() * Rb * Rbc * Utility::skewSymmetric(p) +
+//                 Utility::skewSymmetric(Rbc.transpose() * Rb * Rbc * p));
+//     }
+//   }
+//   return true;
+// }
+
 bool ExRFactor::Evaluate(double const *const *parameters, double *residuals,
                          double **jacobians) const {
   Eigen::Map<Eigen::Vector3d> residual(residuals);
-  Eigen::Vector3d p(1, 1, 1);
   Sophus::Vector3d phi;
   phi << parameters[0][0], parameters[0][1], parameters[0][2];
-  Sophus::SO3d R = Sophus::SO3d::exp(phi);
-  Eigen::Matrix3d Rbc = R.matrix();
-  residual = Rc * p - Rbc.transpose() * Rb * Rbc * p;
+  Eigen::Quaterniond Qc(Rc);
+  Qc = Qc.normalized();
+  Eigen::Quaterniond Qb(Rb);
+  Qb = Qb.normalized();
+  Sophus::SO3d Rbc_SO3 = Sophus::SO3d::exp(phi);
+  Sophus::SO3d Rc_SO3(Qc);
+  Sophus::SO3d Rb_SO3(Qb);
+  residual = (Rb_SO3.inverse() * Rbc_SO3.inverse() * Rc_SO3 * Rbc_SO3).log();
   if (jacobians) {
     if (jacobians[0]) {
       Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> jacobian_R(
           jacobians[0]);
       jacobian_R =
-          -1 * (-Rbc.transpose() * Rb * Rbc * Utility::skewSymmetric(p) +
-                Utility::skewSymmetric(Rbc.transpose() * Rb * Rbc * p));
+          -Utility::Jright((Rbc_SO3.inverse() * Rc_SO3 * Rbc_SO3).matrix()) +
+          Utility::Jleft((Rbc_SO3.inverse() * Rc_SO3 * Rbc_SO3).matrix());
     }
   }
   return true;

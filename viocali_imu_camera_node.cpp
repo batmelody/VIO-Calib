@@ -245,7 +245,10 @@ int RunForSynthesisData() {
   delta_R_imu.clear();
   delta_R_imu = viocali->GetImuRotation();
   double Qic[4];
-  viocali->ValidOptimizer(delta_R_cam, delta_R_imu, Qic);
+  // viocali->CalCulateValidation(delta_R_cam, delta_R_imu);
+  viocali->ValidOptimizer(delta_R_cam, delta_R_imu);
+  // viocali->ExtrinsicROptimizer(delta_R_cam, delta_R_imu, Qic);
+
   // if (viocali->CalibrateExtrinsicR(delta_R_cam, delta_R_imu, viocali->ric)) {
   //   std::cout << " success " << std::endl;
   // } else {

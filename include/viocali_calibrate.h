@@ -58,11 +58,10 @@ public:
                            double Qbc[4]);
 
   void ValidOptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
-                      std::vector<Eigen::Matrix3d> delta_R_imu, double Qbc[4]);
+                      std::vector<Eigen::Matrix3d> delta_R_imu);
 
-  bool QuaternionValidation(std::vector<Eigen::Matrix3d> delta_R_cam,
-                            std::vector<Eigen::Matrix3d> delta_R_imu,
-                            Eigen::Matrix3d &calib_ric_result);
+  bool CalCulateValidation(std::vector<Eigen::Matrix3d> delta_R_cam,
+                           std::vector<Eigen::Matrix3d> delta_R_imu);
 
   /**
    * Get Pre-Integrations of Cam Rotations;

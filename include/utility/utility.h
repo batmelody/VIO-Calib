@@ -78,6 +78,30 @@ public:
     return ans;
   }
 
+  static Eigen::Matrix<double, 3, 3>
+  Jleft(const Eigen::Matrix<double, 3, 3> &R) {
+    Eigen::AngleAxisd angle_axis(R);
+    double theta = angle_axis.angle();
+    Eigen::Vector3d rotation_axis = angle_axis.axis();
+    Eigen::Matrix<double, 3, 3> ans =
+        sin(theta) / theta * Eigen::Matrix3d::Identity() +
+        (1 - sin(theta) / theta) * rotation_axis * rotation_axis.transpose() +
+        ((1 - cos(theta)) / theta) * skewSymmetric(rotation_axis);
+    return ans;
+  }
+
+  static Eigen::Matrix<double, 3, 3>
+  Jright(const Eigen::Matrix<double, 3, 3> &R) {
+    Eigen::AngleAxisd angle_axis(R);
+    double theta = -1 * angle_axis.angle();
+    Eigen::Vector3d rotation_axis = angle_axis.axis();
+    Eigen::Matrix<double, 3, 3> ans =
+        sin(theta) / theta * Eigen::Matrix3d::Identity() +
+        (1 - sin(theta) / theta) * rotation_axis * rotation_axis.transpose() +
+        ((1 - cos(theta)) / theta) * skewSymmetric(rotation_axis);
+    return ans;
+  }
+
   static Eigen::Vector3d R2ypr(const Eigen::Matrix3d &R) {
     Eigen::Vector3d n = R.col(0);
     Eigen::Vector3d o = R.col(1);

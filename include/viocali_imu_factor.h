@@ -3,6 +3,7 @@
 #include <ceres/ceres.h>
 #include <condition_variable>
 #include <map>
+#include <math.h>
 #include <mutex>
 #include <opencv2/opencv.hpp>
 #include <queue>
@@ -70,6 +71,7 @@ public:
                         double **jacobians) const;
   ImuIntegration *PreIntegration;
 };
+
 class ExRFactor : public ceres::SizedCostFunction<3, 3> {
 public:
   ExRFactor(const Eigen::Matrix3d &_R_c, const Eigen::Matrix3d &_R_b);
@@ -78,6 +80,7 @@ public:
 
   Eigen::Matrix3d Rc, Rb;
 };
+
 class CamIMUFactor {
 public:
   CamIMUFactor(const Eigen::Quaterniond &Qc, const Eigen::Quaterniond &Qb)
