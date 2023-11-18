@@ -1,3 +1,0 @@
-/home/weizhengyu/VIOCALI/build/CMakeFiles/viocali_estimator.dir
-/home/weizhengyu/VIOCALI/build/CMakeFiles/edit_cache.dir
-/home/weizhengyu/VIOCALI/build/CMakeFiles/rebuild_cache.dir
