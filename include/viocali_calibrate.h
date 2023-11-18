@@ -44,22 +44,40 @@ public:
 
   /**
    * calibrate Extrinsic of Cam and IMU, which is the core;
+   * @param[out] calib_ric_result : Output of Extrinsic;
    * @param[in] delta_R_cam : Pre-Integrations of Camera frames;
    * @param[in] delta_R_imu : Pre-Integrations of IMU frames;
-   * @param[out] calib_ric_result : Output of Extrinsic;
    * @return 1 if success, error code otherwise.
    */
-  bool CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
-                           std::vector<Eigen::Matrix3d> delta_R_imu,
-                           Eigen::Matrix3d &calib_ric_result);
+  bool CalibrateExtrinsicR(Eigen::Matrix3d &calib_ric_result,
+                           const std::vector<Eigen::Matrix3d> &delta_R_cam,
+                           const std::vector<Eigen::Matrix3d> &delta_R_imu);
 
-  void ExtrinsicROptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
-                           std::vector<Eigen::Matrix3d> delta_R_imu,
-                           double Qbc[4]);
+  /**
+   * calibrate Extrinsic of Cam and IMU, which is the core;
+   * @param[out] rotation_so3 : Output of R in so3(3x1 vector);
+   * @param[in] delta_R_cam : Pre-Integrations of Camera frames;
+   * @param[in] delta_R_imu : Pre-Integrations of IMU frames;
+   * @return 1 if success, error code otherwise.
+   */
+  void ExtrinsicROptimizer(double rotation_so3[3],
+                           const std::vector<Eigen::Matrix3d> &delta_R_cam,
+                           const std::vector<Eigen::Matrix3d> &delta_R_imu);
 
+  /**
+   * validation of the ceres optimization;
+   * @param[in] delta_R_cam : Pre-Integrations of Camera frames;
+   * @param[in] delta_R_imu : Pre-Integrations of IMU frames;
+   * @return 1 if success, error code otherwise.
+   */
   void ValidOptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
                       std::vector<Eigen::Matrix3d> delta_R_imu);
-
+  /**
+   * validation of porperties of the lie group quaternion calculation;
+   * @param[in] delta_R_cam : Pre-Integrations of Camera frames;
+   * @param[in] delta_R_imu : Pre-Integrations of IMU frames;
+   * @return 1 if success, error code otherwise.
+   */
   bool CalCulateValidation(std::vector<Eigen::Matrix3d> delta_R_cam,
                            std::vector<Eigen::Matrix3d> delta_R_imu);
 

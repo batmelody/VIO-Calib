@@ -64,37 +64,21 @@ bool Viocalibrate::CameraLocalization(
   return true;
 }
 
-void Viocalibrate::ExtrinsicROptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
-                                       std::vector<Eigen::Matrix3d> delta_R_imu,
-                                       double Qbc[4]) {
-  ric = Eigen::Matrix3d::Identity();
-
-  for (int i = 0; i < WINDOW_SIZE - 1; i++) {
-    Rc.push_back(delta_R_cam[i]);
-    Rimu.push_back(delta_R_imu[i]);
-  }
-
+void Viocalibrate::ExtrinsicROptimizer(
+    double rotation_so3[3], const std::vector<Eigen::Matrix3d> &delta_R_cam,
+    const std::vector<Eigen::Matrix3d> &delta_R_imu) {
   ceres::Problem problem;
   ceres::LossFunction *loss_function;
   loss_function = new ceres::CauchyLoss(1.0);
-  Qbc[0] = 0.7;
-  Qbc[1] = 0.2;
-  Qbc[2] = 0.6;
-  Qbc[3] = -0.49922;
-
-  ceres::LocalParameterization *local_parameterization_intrinsic =
-      new ceres::EigenQuaternionParameterization();
-
-  problem.AddParameterBlock(Qbc, 4, local_parameterization_intrinsic);
+  ExRLocalParameterization *local_parameterization_intrinsic =
+      new ExRLocalParameterization();
+  problem.AddParameterBlock(rotation_so3, 3, local_parameterization_intrinsic);
 
   for (int i = 1; i < WINDOW_SIZE - 1; i++) {
     ceres::CostFunction *costFunction =
-        new ceres::AutoDiffCostFunction<CamIMUFactor, 3, 4>(
-            new CamIMUFactor(Eigen::Quaterniond(delta_R_cam[i]),
-                             Eigen::Quaterniond(delta_R_imu[i])));
-    problem.AddResidualBlock(costFunction, loss_function, Qbc);
+        new ExRFactor(delta_R_cam[i], delta_R_imu[i]);
+    problem.AddResidualBlock(costFunction, loss_function, rotation_so3);
   }
-
   ceres::Solver::Options options;
   options.minimizer_progress_to_stdout = true;
   options.use_nonmonotonic_steps = true;
@@ -105,15 +89,15 @@ void Viocalibrate::ExtrinsicROptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.BriefReport() << std::endl;
-  Eigen::Quaterniond resQbc(Qbc[0], Qbc[1], Qbc[2], Qbc[3]);
-  Sophus::SO3d SO3_q(resQbc);
-  Sophus::Vector3d so3 = SO3_q.log();
-  std::cout << "so3 = " << so3.transpose() << std::endl;
+  for (int i = 0; i < 3; i++) {
+    std::cout << rotation_so3[i] << " ";
+  }
 }
 
-bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
-                                       std::vector<Eigen::Matrix3d> delta_R_imu,
-                                       Eigen::Matrix3d &calib_ric_result) {
+bool Viocalibrate::CalibrateExtrinsicR(
+    Eigen::Matrix3d &calib_ric_result,
+    const std::vector<Eigen::Matrix3d> &delta_R_cam,
+    const std::vector<Eigen::Matrix3d> &delta_R_imu) {
   ric = Eigen::Matrix3d::Identity();
   for (int i = 0; i < WINDOW_SIZE - 1; i++) {
     Rc.push_back(delta_R_cam[i]);
@@ -149,12 +133,16 @@ bool Viocalibrate::CalibrateExtrinsicR(std::vector<Eigen::Matrix3d> delta_R_cam,
   Eigen::Quaterniond estimated_R(x);
   ric = estimated_R.toRotationMatrix().inverse();
   Eigen::Quaterniond Qic(ric);
-  double Qbc[4];
-  Qbc[0] = Qic.w();
-  Qbc[1] = Qic.x();
-  Qbc[2] = Qic.y();
-  Qbc[3] = Qic.z();
-  ExtrinsicROptimizer(delta_R_cam, delta_R_imu, Qbc);
+  Sophus::SO3d Ric_SO3(Qic);
+  Eigen::Vector3d Vic = Ric_SO3.log();
+  double rotation_so3[3];
+  rotation_so3[0] = Vic.x();
+  rotation_so3[1] = Vic.y();
+  rotation_so3[2] = Vic.z();
+  ExtrinsicROptimizer(rotation_so3, delta_R_cam, delta_R_imu);
+  Ric_SO3 =
+      Sophus::SO3d::exp({rotation_so3[0], rotation_so3[1], rotation_so3[2]});
+  ric = Ric_SO3.matrix();
   return true;
 }
 

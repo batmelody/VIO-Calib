@@ -154,7 +154,7 @@ int RunForRealData() {
   std::vector<Eigen::Matrix3d> Rcw = viocali->GetCamRotation();
   viocali->SolveCamDeltaR(Rcw, delta_R_cam);
   delta_R_imu = viocali->GetImuRotation();
-  if (viocali->CalibrateExtrinsicR(delta_R_cam, delta_R_imu, viocali->ric)) {
+  if (viocali->CalibrateExtrinsicR(viocali->ric, delta_R_cam, delta_R_imu)) {
     std::cout << " success " << std::endl;
   } else {
     std::cout << "false " << std::endl;
@@ -244,16 +244,8 @@ int RunForSynthesisData() {
   viocali->SolveCamDeltaR(Rwc, delta_R_cam);
   delta_R_imu.clear();
   delta_R_imu = viocali->GetImuRotation();
-  double Qic[4];
-  // viocali->CalCulateValidation(delta_R_cam, delta_R_imu);
-  viocali->ValidOptimizer(delta_R_cam, delta_R_imu);
-  // viocali->ExtrinsicROptimizer(delta_R_cam, delta_R_imu, Qic);
-
-  // if (viocali->CalibrateExtrinsicR(delta_R_cam, delta_R_imu, viocali->ric)) {
-  //   std::cout << " success " << std::endl;
-  // } else {
-  //   std::cout << "false " << std::endl;
-  // }
+  Eigen::Matrix3d Ric;
+  viocali->CalibrateExtrinsicR(viocali->ric, delta_R_cam, delta_R_imu);
   delete viocali;
   return 0;
 }
