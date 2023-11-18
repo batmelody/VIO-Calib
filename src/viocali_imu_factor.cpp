@@ -358,14 +358,14 @@ bool ExRFactor::Evaluate(double const *const *parameters, double *residuals,
   Sophus::SO3d Rbc_SO3 = Sophus::SO3d::exp(phi);
   Sophus::SO3d Rc_SO3(Qc);
   Sophus::SO3d Rb_SO3(Qb);
-  residual = (Rb_SO3.inverse() * Rbc_SO3.inverse() * Rc_SO3 * Rbc_SO3).log();
+  residual = (Rb_SO3.inverse() * Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).log();
   if (jacobians) {
     if (jacobians[0]) {
       Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> jacobian_R(
           jacobians[0]);
       jacobian_R =
-          -Utility::Jright((Rbc_SO3.inverse() * Rc_SO3 * Rbc_SO3).matrix()) +
-          Utility::Jleft((Rbc_SO3.inverse() * Rc_SO3 * Rbc_SO3).matrix());
+          Utility::Jright((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix()) -
+          Utility::Jleft((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix());
     }
   }
   return true;

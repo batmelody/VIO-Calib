@@ -78,7 +78,7 @@ class ExRLocalParameterization : public ceres::LocalParameterization {
     Eigen::Map<Eigen::Matrix<double, 3, 1>> x_plus_delta_phi(x_plus_delta);
     Sophus::SO3d R = Sophus::SO3d::exp(phi);
     Sophus::SO3d delta_R = Sophus::SO3d::exp(delta_phi);
-    x_plus_delta_phi = (R * delta_R).log();
+    x_plus_delta_phi = (delta_R * R).log();
     return true;
   }
 

@@ -221,7 +221,7 @@ void Viocalibrate::ValidOptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
 
   for (int i = 1; i < WINDOW_SIZE - 1; i++) {
     ceres::CostFunction *costFunction =
-        new ExRFactor(delta_R_cam[i], Rbc.inverse() * delta_R_cam[i] * Rbc);
+        new ExRFactor(delta_R_cam[i], Rbc * delta_R_cam[i] * Rbc.inverse());
     problem.AddResidualBlock(costFunction, loss_function, Qbc[0]);
   }
 
