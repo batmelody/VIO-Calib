@@ -1,3 +1,4 @@
+#include "calibrate_local_parameterization.h"
 #include "ceres/ceres.h"
 #include "ceres/rotation.h"
 #include "parameters.h"
@@ -14,44 +15,14 @@
 #include <sophus/so3.hpp>
 #include <vector>
 
-class ExtrinsicOnlyFactor : public ceres::SizedCostFunction<3, 6> {
-public:
-  ExtrinsicOnlyFactor(const Eigen::Vector3d &_pts_i,
-                      const Eigen::Vector3d &_pts_j);
-  virtual bool Evaluate(double const *const *parameters, double *residuals,
-                        double **jacobians) const;
-
-  Eigen::Vector3d pts_i, pts_j;
-};
-
-// class QuaternionFactor : public ceres::SizedCostFunction<4, 4> {
-// public:
-//   QuaternionFactor(const Eigen::Quaterniond &Q_cam_,
-//                    const Eigen::Quaterniond &Q_imu_);
-//   virtual bool Evaluate(double const *const *parameters, double *residuals,
-//                         double **jacobians) const;
-
-//   Eigen::Vector3d Q_cam, Q_imu;
-// };
-
-class EucmFactor : public ceres::SizedCostFunction<2, 6, 2, 4> {
-public:
-  EucmFactor(const Eigen::Vector3d &_pts_i, const Eigen::Vector3d &_pts_j);
-  virtual bool Evaluate(double const *const *parameters, double *residuals,
-                        double **jacobians) const;
-
-  Eigen::Vector3d pts_i, pts_j;
-};
-
 class Camera;
-
 typedef boost::shared_ptr<Camera> CameraPtr;
 typedef boost::shared_ptr<const Camera> CameraConstPtr;
 
 class Camera {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  enum ModelType { FISHEYE, MEI, PINHOLE, SCARAMUZZA };
+  enum ModelType { FISHEYE, MEI, PINHOLE, SCARAMUZZA, EUCM };
 
   class Parameters {
   public:
@@ -348,6 +319,129 @@ void PinholeCamera::spaceToPlane(const T *const params, const T *const q,
   p(0) = fx * (u + alpha * v) + cx;
   p(1) = fy * v + cy;
 }
+
+class EucmCamera : public Camera {
+public:
+  class Parameters : public Camera::Parameters {
+  public:
+    Parameters();
+    Parameters(const std::string &CameraName, int w, int h, double alpha,
+               double beta, double fx, double fy, double cx, double cy);
+
+    double &alpha(void);
+    double &beta(void);
+    double &fx(void);
+    double &fy(void);
+    double &cx(void);
+    double &cy(void);
+
+    double alpha(void) const;
+    double beta(void) const;
+    double fx(void) const;
+    double fy(void) const;
+    double cx(void) const;
+    double cy(void) const;
+
+    bool readFromYamlFile(const std::string &filename);
+    void writeToYamlFile(const std::string &filename) const;
+
+    Parameters &operator=(const Parameters &other);
+    friend std::ostream &operator<<(std::ostream &out,
+                                    const Parameters &params);
+
+  private:
+    double m_alpha;
+    double m_beta;
+    double m_fx;
+    double m_fy;
+    double m_cx;
+    double m_cy;
+  };
+
+  EucmCamera();
+
+  /**
+   * \brief Constructor from the projection model parameters
+   */
+  EucmCamera(const std::string &CameraName, int imageWidth, int imageHeight,
+             double alpha, double beta, double fx, double fy, double cx,
+             double cy);
+  /**
+   * \brief Constructor from the projection model parameters
+   */
+  EucmCamera(const Parameters &params);
+
+  Camera::ModelType modelType(void) const;
+  const std::string &CameraName(void) const;
+  int imageWidth(void) const;
+  int imageHeight(void) const;
+
+  void
+  estimateIntrinsics(const cv::Size &boardSize,
+                     const std::vector<std::vector<cv::Point3f>> &objectPoints,
+                     const std::vector<std::vector<cv::Point2f>> &imagePoints);
+
+  // Lift points from the image plane to the sphere
+  virtual void liftSphere(const Eigen::Vector2d &p, Eigen::Vector3d &P) const;
+  //%output P
+
+  // Lift points from the image plane to the projective space
+  void liftProjective(const Eigen::Vector2d &p, Eigen::Vector3d &P) const;
+  //%output P
+
+  // Projects 3D points to the image plane (Pi function)
+  void spaceToPlane(const Eigen::Vector3d &P, Eigen::Vector2d &p) const;
+  //%output p
+
+  void undistToPlane(const Eigen::Vector2d &p_u, Eigen::Vector2d &p) const;
+  //%output p
+
+  template <typename T>
+  static void spaceToPlane(const T *const params, const T *const q,
+                           const T *const t, const Eigen::Matrix<T, 3, 1> &P,
+                           Eigen::Matrix<T, 2, 1> &p);
+
+  void distortion(const Eigen::Vector2d &p_u, Eigen::Vector2d &d_u) const;
+
+  void initUndistortMap(cv::Mat &map1, cv::Mat &map2,
+                        double fScale = 1.0) const;
+  cv::Mat
+  initUndistortRectifyMap(cv::Mat &map1, cv::Mat &map2, float fx = -1.0f,
+                          float fy = -1.0f, cv::Size imageSize = cv::Size(0, 0),
+                          float cx = -1.0f, float cy = -1.0f,
+                          cv::Mat rmat = cv::Mat::eye(3, 3, CV_32F)) const;
+
+  int parameterCount(void) const;
+
+  const Parameters &getParameters(void) const;
+  void setParameters(const Parameters &parameters);
+
+  void readParameters(const std::vector<double> &parameterVec);
+  void writeParameters(std::vector<double> &parameterVec) const;
+
+  void writeParametersToYamlFile(const std::string &filename) const;
+
+  std::string parametersToString(void) const;
+
+private:
+  Parameters mParameters;
+
+  double m_inv_K11, m_inv_K13, m_inv_K22, m_inv_K23;
+  bool m_noDistortion;
+};
+typedef boost::shared_ptr<EucmCamera> EucmCameraPtr;
+typedef boost::shared_ptr<const EucmCamera> EucmCameraConstPtr;
+
+class EucmCostFunction : public ceres::SizedCostFunction<2, 6, 2, 4> {
+public:
+  EucmCostFunction(const Eigen::Vector3d &_pts_i,
+                   const Eigen::Vector2d &_pts_j);
+  virtual bool Evaluate(double const *const *parameters, double *residuals,
+                        double **jacobians) const;
+
+  Eigen::Vector3d pts_i;
+  Eigen::Vector2d pts_j;
+};
 
 class FisheyeCamera : public Camera {
 public:

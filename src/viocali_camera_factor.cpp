@@ -1,165 +1,5 @@
 #include "viocali_camera_factor.h"
 
-ExtrinsicOnlyFactor::ExtrinsicOnlyFactor(const Eigen::Vector3d &_pts_i,
-                                         const Eigen::Vector3d &_pts_j)
-    : pts_i(_pts_i), pts_j(_pts_j){
-
-                     };
-
-// QuaternionFactor::QuaternionFactor(const Eigen::Quaterniond &Q_cam_,
-//                                    const Eigen::Quaterniond &Q_imu_)
-//     : Q_cam(Q_cam_), Q_imu(Q_imu_){
-
-//                      };
-
-EucmFactor::EucmFactor(const Eigen::Vector3d &_pts_i,
-                       const Eigen::Vector3d &_pts_j)
-    : pts_i(_pts_i), pts_j(_pts_j){
-
-                     };
-
-/*Sophus Version (WZY trust)*/
-bool ExtrinsicOnlyFactor::Evaluate(double const *const *parameters,
-                                   double *residuals,
-                                   double **jacobians) const {
-
-  Eigen::Map<Eigen::Vector3d> residual(residuals);
-
-  Sophus::Vector6d Xi;
-  Xi << parameters[0][0], parameters[0][1], parameters[0][2], parameters[0][3],
-      parameters[0][4], parameters[0][5];
-  Sophus::SE3d T = Sophus::SE3d::exp(Xi);
-
-  Eigen::Vector3d pts_j_pre = T * pts_i;
-  residual = pts_j - pts_j_pre;
-  double x = pts_j_pre[0];
-  double y = pts_j_pre[1];
-  double z = pts_j_pre[2];
-  if (jacobians) {
-    if (jacobians[0]) {
-      Eigen::Map<Eigen::Matrix<double, 3, 6, Eigen::RowMajor>> jacobian_pose_i(
-          jacobians[0]);
-      jacobian_pose_i.setZero();
-      jacobian_pose_i(0, 0) = 1;
-      jacobian_pose_i(0, 4) = z;
-      jacobian_pose_i(0, 5) = -y;
-      jacobian_pose_i(1, 1) = 1;
-      jacobian_pose_i(1, 3) = -z;
-      jacobian_pose_i(1, 5) = x;
-      jacobian_pose_i(2, 2) = 1;
-      jacobian_pose_i(2, 3) = y;
-      jacobian_pose_i(2, 4) = -x;
-      jacobian_pose_i = -jacobian_pose_i;
-    }
-  }
-  return true;
-}
-
-/*Quaternion Valid (WZY trust)*/
-// bool QuaternionFactor::Evaluate(double const *const *parameters,
-//                                 double *residuals, double **jacobians) const
-//                                 {
-
-//   Eigen::Quaterniond Qic(parameters[0][0], parameters[0][1],
-//   parameters[0][2],
-//                          parameters[0][3]);
-
-//   Eigen::Map<Eigen::Vector4d> residual(residuals);
-
-//   return true;
-// }
-
-/*EUCM full-estimate*/
-bool EucmFactor::Evaluate(double const *const *parameters, double *residuals,
-                          double **jacobians) const {
-
-  Eigen::Map<Eigen::Vector2d> residual(residuals);
-
-  Sophus::Vector6d Xi;
-  Xi << parameters[0][0], parameters[0][1], parameters[0][2], parameters[0][3],
-      parameters[0][4], parameters[0][5];
-  Sophus::SE3d T = Sophus::SE3d::exp(Xi);
-  Eigen::Vector3d pts_c_pre = T * pts_i;
-  double x = pts_c_pre[0];
-  double y = pts_c_pre[1];
-  double z = pts_c_pre[2];
-
-  double alpha = parameters[1][0];
-  double beta = parameters[1][1];
-
-  double rho = sqrt(beta * (x * x + y * y) + z * z);
-  double eta = alpha * rho + (1 - alpha) * z;
-
-  Eigen::Vector3d pts_m_pre(x / (alpha * rho + (1 - alpha) * z),
-                            y / (alpha * rho + (1 - alpha) * z), 1);
-
-  Eigen::Matrix<double, 2, 3, Eigen::RowMajor> dPm_dPc;
-  dPm_dPc(0, 0) = 1 / eta - (alpha * beta * x * x) / ((eta * eta) * rho);
-  dPm_dPc(0, 1) = (-alpha * beta * x * y) / ((eta * eta) * rho);
-  dPm_dPc(0, 2) = -x / (eta * eta) * ((1 - alpha) + alpha * z / rho);
-  dPm_dPc(1, 0) = (-alpha * beta * x * y) / ((eta * eta) * rho);
-  dPm_dPc(1, 1) = 1 / eta - (alpha * beta * y * y) / ((eta * eta) * rho);
-  dPm_dPc(1, 2) = -y / (eta * eta) * ((1 - alpha) + alpha * z / rho);
-
-  Eigen::Matrix<double, 3, 6, Eigen::RowMajor> dPc_dPw;
-  dPc_dPw(0, 0) = 1;
-  dPc_dPw(0, 4) = z;
-  dPc_dPw(0, 5) = -y;
-  dPc_dPw(1, 1) = 1;
-  dPc_dPw(1, 3) = -z;
-  dPc_dPw(1, 5) = x;
-  dPc_dPw(2, 2) = 1;
-  dPc_dPw(2, 3) = y;
-  dPc_dPw(2, 4) = -x;
-
-  Eigen::Matrix<double, 2, 2, Eigen::RowMajor> dPm_dD;
-  dPm_dD(0, 0) = -x / (eta * eta) * (rho - z);
-  dPm_dD(0, 1) = -x / (eta * eta) * (alpha * (x * x + y * y) / (2 * rho));
-  dPm_dD(1, 0) = -y / (eta * eta) * (rho - z);
-  dPm_dD(1, 1) = -y / (eta * eta) * (alpha * (x * x + y * y) / (2 * rho));
-
-  Eigen::Matrix<double, 2, 2, Eigen::RowMajor> dp_dPm;
-  dp_dPm(0, 0) = parameters[2][0];
-  dp_dPm(0, 1) = 0;
-  dp_dPm(1, 0) = 0;
-  dp_dPm(1, 1) = parameters[2][1];
-
-  Eigen::Matrix<double, 2, 4, Eigen::RowMajor> dp_dK;
-  dp_dK(0, 0) = pts_m_pre.x();
-  dp_dK(0, 1) = 0;
-  dp_dK(0, 2) = 1;
-  dp_dK(0, 3) = 0;
-  dp_dK(1, 0) = 0;
-  dp_dK(1, 1) = pts_m_pre.y();
-  dp_dK(1, 2) = 0;
-  dp_dK(1, 3) = 1;
-
-  residual[0] = pts_j[0] - (pts_m_pre[0] * parameters[2][0] + parameters[2][2]);
-  residual[1] = pts_j[1] - (pts_m_pre[1] * parameters[2][1] + parameters[2][3]);
-
-  if (jacobians) {
-    if (jacobians[0]) {
-      Eigen::Map<Eigen::Matrix<double, 2, 6, Eigen::RowMajor>> jacobian_pose_i(
-          jacobians[0]);
-      jacobian_pose_i.setZero();
-      jacobian_pose_i = -1 * dp_dPm * dPm_dPc * dPc_dPw;
-    }
-    if (jacobians[1]) {
-      Eigen::Map<Eigen::Matrix<double, 2, 2, Eigen::RowMajor>> jacobian_dist_i(
-          jacobians[1]);
-      jacobian_dist_i.setZero();
-      jacobian_dist_i = -1 * dp_dPm * dPm_dD;
-    }
-    if (jacobians[2]) {
-      Eigen::Map<Eigen::Matrix<double, 2, 4, Eigen::RowMajor>> jacobian_dist_i(
-          jacobians[2]);
-      jacobian_dist_i.setZero();
-      jacobian_dist_i = -1 * dp_dK;
-    }
-  }
-  return true;
-}
-
 /*Camera Class*/
 Camera::Parameters::Parameters(ModelType modelType)
     : m_modelType(modelType), m_imageWidth(0), m_imageHeight(0) {
@@ -169,6 +9,9 @@ Camera::Parameters::Parameters(ModelType modelType)
     break;
   case PINHOLE:
     m_nIntrinsics = 8;
+    break;
+  case EUCM:
+    m_nIntrinsics = 6;
     break;
   case MEI:
   default:
@@ -186,6 +29,9 @@ Camera::Parameters::Parameters(ModelType modelType,
     break;
   case PINHOLE:
     m_nIntrinsics = 8;
+    break;
+  case EUCM:
+    m_nIntrinsics = 6;
     break;
   case MEI:
   default:
@@ -233,7 +79,6 @@ void Camera::estimateExtrinsics(const std::vector<cv::Point3f> &objectPoints,
     Ms.at(i).x = P(0);
     Ms.at(i).y = P(1);
   }
-
   // assume unit focal length, zero principal point, and zero distortion
   cv::solvePnP(objectPoints, Ms, cv::Mat::eye(3, 3, CV_64F), cv::noArray(),
                rvec, tvec);
@@ -953,6 +798,614 @@ std::string PinholeCamera::parametersToString(void) const {
   return oss.str();
 }
 
+/* EucmCamera*/
+EucmCamera::Parameters::Parameters()
+    : Camera::Parameters(EUCM), m_alpha(0.0), m_beta(0.0), m_fx(0.0), m_fy(0.0),
+      m_cx(0.0), m_cy(0.0) {}
+
+EucmCamera::Parameters::Parameters(const std::string &CameraName, int w, int h,
+                                   double alpha, double beta, double fx,
+                                   double fy, double cx, double cy)
+    : Camera::Parameters(EUCM, CameraName, w, h), m_alpha(alpha), m_beta(beta),
+      m_fx(fx), m_fy(fy), m_cx(cx), m_cy(cy) {}
+
+double &EucmCamera::Parameters::alpha(void) { return m_alpha; }
+
+double &EucmCamera::Parameters::beta(void) { return m_beta; }
+
+double &EucmCamera::Parameters::fx(void) { return m_fx; }
+
+double &EucmCamera::Parameters::fy(void) { return m_fy; }
+
+double &EucmCamera::Parameters::cx(void) { return m_cx; }
+
+double &EucmCamera::Parameters::cy(void) { return m_cy; }
+
+double EucmCamera::Parameters::alpha(void) const { return m_alpha; }
+
+double EucmCamera::Parameters::beta(void) const { return m_beta; }
+
+double EucmCamera::Parameters::fx(void) const { return m_fx; }
+
+double EucmCamera::Parameters::fy(void) const { return m_fy; }
+
+double EucmCamera::Parameters::cx(void) const { return m_cx; }
+
+double EucmCamera::Parameters::cy(void) const { return m_cy; }
+
+bool EucmCamera::Parameters::readFromYamlFile(const std::string &filename) {
+  cv::FileStorage fs(filename, cv::FileStorage::READ);
+
+  if (!fs.isOpened()) {
+    return false;
+  }
+
+  if (!fs["model_type"].isNone()) {
+    std::string sModelType;
+    fs["model_type"] >> sModelType;
+
+    if (sModelType.compare("EUCM") != 0) {
+      return false;
+    }
+  }
+
+  m_modelType = EUCM;
+  fs["camera_name"] >> mCameraName;
+  m_imageWidth = static_cast<int>(fs["image_width"]);
+  m_imageHeight = static_cast<int>(fs["image_height"]);
+
+  cv::FileNode n = fs["distortion_parameters"];
+  m_alpha = static_cast<double>(n["alpha"]);
+  m_beta = static_cast<double>(n["beta"]);
+
+  n = fs["projection_parameters"];
+  m_fx = static_cast<double>(n["fx"]);
+  m_fy = static_cast<double>(n["fy"]);
+  m_cx = static_cast<double>(n["cx"]);
+  m_cy = static_cast<double>(n["cy"]);
+
+  return true;
+}
+
+void EucmCamera::Parameters::writeToYamlFile(
+    const std::string &filename) const {
+  cv::FileStorage fs(filename, cv::FileStorage::WRITE);
+
+  fs << "model_type"
+     << "EUCM";
+  fs << "camera_name" << mCameraName;
+  fs << "image_width" << m_imageWidth;
+  fs << "image_height" << m_imageHeight;
+
+  fs << "distortion_parameters";
+  fs << "{"
+     << "alpha" << m_alpha << "beta" << m_beta << "}";
+
+  // projection: fx, fy, cx, cy
+  fs << "projection_parameters";
+  fs << "{"
+     << "fx" << m_fx << "fy" << m_fy << "cx" << m_cx << "cy" << m_cy << "}";
+
+  fs.release();
+}
+
+EucmCamera::Parameters &
+EucmCamera::Parameters::operator=(const EucmCamera::Parameters &other) {
+  if (this != &other) {
+    m_modelType = other.m_modelType;
+    mCameraName = other.mCameraName;
+    m_imageWidth = other.m_imageWidth;
+    m_imageHeight = other.m_imageHeight;
+    m_alpha = other.m_alpha;
+    m_beta = other.m_beta;
+    m_fx = other.m_fx;
+    m_fy = other.m_fy;
+    m_cx = other.m_cx;
+    m_cy = other.m_cy;
+  }
+
+  return *this;
+}
+
+std::ostream &operator<<(std::ostream &out,
+                         const EucmCamera::Parameters &params) {
+  out << "Camera Parameters:" << std::endl;
+  out << "    model_type "
+      << "EUCM" << std::endl;
+  out << "   camera_name " << params.mCameraName << std::endl;
+  out << "   image_width " << params.m_imageWidth << std::endl;
+  out << "  image_height " << params.m_imageHeight << std::endl;
+
+  out << "Distortion Parameters" << std::endl;
+  out << "           alpha " << params.m_alpha << std::endl
+      << "           beta " << params.m_beta << std::endl;
+
+  // projection: fx, fy, cx, cy
+  out << "Projection Parameters" << std::endl;
+  out << "            fx " << params.m_fx << std::endl
+      << "            fy " << params.m_fy << std::endl
+      << "            cx " << params.m_cx << std::endl
+      << "            cy " << params.m_cy << std::endl;
+
+  return out;
+}
+
+EucmCamera::EucmCamera()
+    : m_inv_K11(1.0), m_inv_K13(0.0), m_inv_K22(1.0), m_inv_K23(0.0),
+      m_noDistortion(true) {}
+
+EucmCamera::EucmCamera(const std::string &CameraName, int imageWidth,
+                       int imageHeight, double alpha, double beta, double fx,
+                       double fy, double cx, double cy)
+    : mParameters(CameraName, imageWidth, imageHeight, alpha, beta, fx, fy, cx,
+                  cy) {
+  if ((mParameters.alpha() == 0.0) && (mParameters.beta() == 0.0)) {
+    m_noDistortion = true;
+  } else {
+    m_noDistortion = false;
+  }
+
+  // Inverse camera projection matrix parameters
+  m_inv_K11 = 1.0 / mParameters.fx();
+  m_inv_K13 = -mParameters.cx() / mParameters.fx();
+  m_inv_K22 = 1.0 / mParameters.fy();
+  m_inv_K23 = -mParameters.cy() / mParameters.fy();
+}
+
+EucmCamera::EucmCamera(const EucmCamera::Parameters &params)
+    : mParameters(params) {
+  if ((mParameters.alpha() == 0.0) && (mParameters.beta() == 0.0)) {
+    m_noDistortion = true;
+  } else {
+    m_noDistortion = false;
+  }
+
+  // Inverse camera projection matrix parameters
+  m_inv_K11 = 1.0 / mParameters.fx();
+  m_inv_K13 = -mParameters.cx() / mParameters.fx();
+  m_inv_K22 = 1.0 / mParameters.fy();
+  m_inv_K23 = -mParameters.cy() / mParameters.fy();
+}
+
+Camera::ModelType EucmCamera::modelType(void) const {
+  return mParameters.modelType();
+}
+
+const std::string &EucmCamera::CameraName(void) const {
+  return mParameters.CameraName();
+}
+
+int EucmCamera::imageWidth(void) const { return mParameters.imageWidth(); }
+
+int EucmCamera::imageHeight(void) const { return mParameters.imageHeight(); }
+
+void EucmCamera::estimateIntrinsics(
+    const cv::Size &boardSize,
+    const std::vector<std::vector<cv::Point3f>> &objectPoints,
+    const std::vector<std::vector<cv::Point2f>> &imagePoints) {
+
+  Parameters params = getParameters();
+
+  params.alpha() = 0.0;
+  params.beta() = 0.0;
+
+  double cx = params.imageWidth() / 2.0;
+  double cy = params.imageHeight() / 2.0;
+  params.cx() = cx;
+  params.cy() = cy;
+
+  size_t nImages = imagePoints.size();
+
+  cv::Mat A(nImages * 2, 2, CV_64F);
+  cv::Mat b(nImages * 2, 1, CV_64F);
+
+  for (size_t i = 0; i < nImages; ++i) {
+    const std::vector<cv::Point3f> &oPoints = objectPoints.at(i);
+
+    std::vector<cv::Point2f> M(oPoints.size());
+    for (size_t j = 0; j < M.size(); ++j) {
+      M.at(j) = cv::Point2f(oPoints.at(j).x, oPoints.at(j).y);
+    }
+
+    cv::Mat H = cv::findHomography(M, imagePoints.at(i));
+
+    H.at<double>(0, 0) -= H.at<double>(2, 0) * cx;
+    H.at<double>(0, 1) -= H.at<double>(2, 1) * cx;
+    H.at<double>(0, 2) -= H.at<double>(2, 2) * cx;
+    H.at<double>(1, 0) -= H.at<double>(2, 0) * cy;
+    H.at<double>(1, 1) -= H.at<double>(2, 1) * cy;
+    H.at<double>(1, 2) -= H.at<double>(2, 2) * cy;
+
+    double h[3], v[3], d1[3], d2[3];
+    double n[4] = {0, 0, 0, 0};
+
+    for (int j = 0; j < 3; ++j) {
+      double t0 = H.at<double>(j, 0);
+      double t1 = H.at<double>(j, 1);
+      h[j] = t0;
+      v[j] = t1;
+      d1[j] = (t0 + t1) * 0.5;
+      d2[j] = (t0 - t1) * 0.5;
+      n[0] += t0 * t0;
+      n[1] += t1 * t1;
+      n[2] += d1[j] * d1[j];
+      n[3] += d2[j] * d2[j];
+    }
+
+    for (int j = 0; j < 4; ++j) {
+      n[j] = 1.0 / sqrt(n[j]);
+    }
+
+    for (int j = 0; j < 3; ++j) {
+      h[j] *= n[0];
+      v[j] *= n[1];
+      d1[j] *= n[2];
+      d2[j] *= n[3];
+    }
+
+    A.at<double>(i * 2, 0) = h[0] * v[0];
+    A.at<double>(i * 2, 1) = h[1] * v[1];
+    A.at<double>(i * 2 + 1, 0) = d1[0] * d2[0];
+    A.at<double>(i * 2 + 1, 1) = d1[1] * d2[1];
+    b.at<double>(i * 2, 0) = -h[2] * v[2];
+    b.at<double>(i * 2 + 1, 0) = -d1[2] * d2[2];
+  }
+  cv::Mat f(2, 1, CV_64F);
+  cv::solve(A, b, f, cv::DECOMP_NORMAL | cv::DECOMP_LU);
+  params.fx() = sqrt(fabs(1.0 / f.at<double>(0)));
+  params.fy() = sqrt(fabs(1.0 / f.at<double>(1)));
+
+  setParameters(params);
+}
+
+/**
+ * \brief Lifts a point from the image plane to the unit sphere
+ *
+ * \param p image coordinates
+ * \param P coordinates of the point on the sphere
+ */
+void EucmCamera::liftSphere(const Eigen::Vector2d &p,
+                            Eigen::Vector3d &P) const {
+  liftProjective(p, P);
+
+  P.normalize();
+}
+
+void EucmCamera::distortion(const Eigen::Vector2d &p_u,
+                            Eigen::Vector2d &d_u) const {
+  // Project points to the normlized plane
+  double x = p_u.x();
+  double y = p_u.y();
+  double z = 1.0;
+
+  double alpha = mParameters.alpha();
+  double beta = mParameters.beta();
+
+  double rho = sqrt(beta * (x * x + y * y) + z * z);
+  double eta = alpha * rho + (1 - alpha) * z;
+
+  d_u(x / (alpha * rho + (1 - alpha) * z), y / (alpha * rho + (1 - alpha) * z));
+}
+
+/**
+ * \brief Lifts a point from the image plane to its projective ray
+ *
+ * \param p image coordinates
+ * \param P coordinates of the projective ray
+ */
+void EucmCamera::liftProjective(const Eigen::Vector2d &p,
+                                Eigen::Vector3d &P) const {
+  double mx_d, my_d, mx2_d, mxy_d, my2_d, mx_u, my_u;
+  // double lambda;
+  // Lift points to normalised plane
+  mx_d = m_inv_K11 * p(0) + m_inv_K13;
+  my_d = m_inv_K22 * p(1) + m_inv_K23;
+
+  if (m_noDistortion) {
+    mx_u = mx_d;
+    my_u = my_d;
+  } else {
+    {
+      // Recursive distortion model
+      int n = 8;
+      Eigen::Vector2d d_u;
+      distortion(Eigen::Vector2d(mx_d, my_d), d_u);
+      // Approximate value
+      mx_u = mx_d - d_u(0);
+      my_u = my_d - d_u(1);
+
+      for (int i = 1; i < n; ++i) {
+        distortion(Eigen::Vector2d(mx_u, my_u), d_u);
+        mx_u = mx_d - d_u(0);
+        my_u = my_d - d_u(1);
+      }
+    }
+  }
+
+  // Obtain a projective ray
+  P << mx_u, my_u, 1.0;
+}
+
+void EucmCamera::undistToPlane(const Eigen::Vector2d &p_u,
+                               Eigen::Vector2d &p) const {
+  //    Eigen::Vector2d p_d;
+  //
+  //    if (m_noDistortion)
+  //    {
+  //        p_d = p_u;
+  //    }
+  //    else
+  //    {
+  //        // Apply distortion
+  //        Eigen::Vector2d d_u;
+  //        distortion(p_u, d_u);
+  //        p_d = p_u + d_u;
+  //    }
+  //
+  //    // Apply generalised projection matrix
+  //    p << mParameters.gamma1() * p_d(0) + mParameters.u0(),
+  //         mParameters.gamma2() * p_d(1) + mParameters.v0();
+}
+
+/**
+ * \brief Project a 3D point (\a x,\a y,\a z) to the image plane in (\a u,\a v)
+ *
+ * \param P 3D point coordinates
+ * \param p return value, contains the image point coordinates
+ */
+void EucmCamera::spaceToPlane(const Eigen::Vector3d &P,
+                              Eigen::Vector2d &p) const {
+  // Project points to the normlized plane
+  double x = P.x();
+  double y = P.y();
+  double z = P.z();
+
+  double alpha = mParameters.alpha();
+  double beta = mParameters.beta();
+
+  double rho = sqrt(beta * (x * x + y * y) + z * z);
+  double eta = alpha * rho + (1 - alpha) * z;
+
+  Eigen::Vector2d p_d(x / (alpha * rho + (1 - alpha) * z),
+                      y / (alpha * rho + (1 - alpha) * z));
+
+  // Apply generalised projection matrix
+  p << mParameters.fx() * p_d(0) + mParameters.cx(),
+      mParameters.fy() * p_d(1) + mParameters.cy();
+}
+
+void EucmCamera::initUndistortMap(cv::Mat &map1, cv::Mat &map2,
+                                  double fScale) const {
+  cv::Size imageSize(mParameters.imageWidth(), mParameters.imageHeight());
+
+  cv::Mat mapX = cv::Mat::zeros(imageSize, CV_32F);
+  cv::Mat mapY = cv::Mat::zeros(imageSize, CV_32F);
+
+  for (int v = 0; v < imageSize.height; ++v) {
+    for (int u = 0; u < imageSize.width; ++u) {
+      double mx_u = m_inv_K11 / fScale * u + m_inv_K13 / fScale;
+      double my_u = m_inv_K22 / fScale * v + m_inv_K23 / fScale;
+
+      Eigen::Vector3d P;
+      P << mx_u, my_u, 1.0;
+
+      Eigen::Vector2d p;
+      spaceToPlane(P, p);
+
+      mapX.at<float>(v, u) = p(0);
+      mapY.at<float>(v, u) = p(1);
+    }
+  }
+
+  cv::convertMaps(mapX, mapY, map1, map2, CV_32FC1, false);
+}
+
+cv::Mat EucmCamera::initUndistortRectifyMap(cv::Mat &map1, cv::Mat &map2,
+                                            float fx, float fy,
+                                            cv::Size imageSize, float cx,
+                                            float cy, cv::Mat rmat) const {
+  if (imageSize == cv::Size(0, 0)) {
+    imageSize = cv::Size(mParameters.imageWidth(), mParameters.imageHeight());
+  }
+
+  cv::Mat mapX = cv::Mat::zeros(imageSize.height, imageSize.width, CV_32F);
+  cv::Mat mapY = cv::Mat::zeros(imageSize.height, imageSize.width, CV_32F);
+
+  Eigen::Matrix3f R, R_inv;
+  cv::cv2eigen(rmat, R);
+  R_inv = R.inverse();
+
+  // assume no skew
+  Eigen::Matrix3f K_rect;
+
+  if (cx == -1.0f || cy == -1.0f) {
+    K_rect << fx, 0, imageSize.width / 2, 0, fy, imageSize.height / 2, 0, 0, 1;
+  } else {
+    K_rect << fx, 0, cx, 0, fy, cy, 0, 0, 1;
+  }
+
+  if (fx == -1.0f || fy == -1.0f) {
+    K_rect(0, 0) = mParameters.fx();
+    K_rect(1, 1) = mParameters.fy();
+  }
+
+  Eigen::Matrix3f K_rect_inv = K_rect.inverse();
+
+  for (int v = 0; v < imageSize.height; ++v) {
+    for (int u = 0; u < imageSize.width; ++u) {
+      Eigen::Vector3f xo;
+      xo << u, v, 1;
+
+      Eigen::Vector3f uo = R_inv * K_rect_inv * xo;
+
+      Eigen::Vector2d p;
+      spaceToPlane(uo.cast<double>(), p);
+
+      mapX.at<float>(v, u) = p(0);
+      mapY.at<float>(v, u) = p(1);
+    }
+  }
+  cv::convertMaps(mapX, mapY, map1, map2, CV_32FC1, false);
+  cv::Mat K_rect_cv;
+  cv::eigen2cv(K_rect, K_rect_cv);
+  return K_rect_cv;
+}
+
+int EucmCamera::parameterCount(void) const { return 6; }
+
+const EucmCamera::Parameters &EucmCamera::getParameters(void) const {
+  return mParameters;
+}
+
+void EucmCamera::setParameters(const EucmCamera::Parameters &parameters) {
+  mParameters = parameters;
+
+  if ((mParameters.alpha() == 0.0) && (mParameters.beta() == 0.0)) {
+    m_noDistortion = true;
+  } else {
+    m_noDistortion = false;
+  }
+
+  m_inv_K11 = 1.0 / mParameters.fx();
+  m_inv_K13 = -mParameters.cx() / mParameters.fx();
+  m_inv_K22 = 1.0 / mParameters.fy();
+  m_inv_K23 = -mParameters.cy() / mParameters.fy();
+}
+
+void EucmCamera::readParameters(const std::vector<double> &parameterVec) {
+  if ((int)parameterVec.size() != parameterCount()) {
+    return;
+  }
+
+  Parameters params = getParameters();
+
+  params.alpha() = parameterVec.at(0);
+  params.beta() = parameterVec.at(1);
+  params.fx() = parameterVec.at(2);
+  params.fy() = parameterVec.at(3);
+  params.cx() = parameterVec.at(4);
+  params.cy() = parameterVec.at(5);
+
+  setParameters(params);
+}
+
+void EucmCamera::writeParameters(std::vector<double> &parameterVec) const {
+  parameterVec.resize(parameterCount());
+  parameterVec.at(0) = mParameters.alpha();
+  parameterVec.at(1) = mParameters.beta();
+  parameterVec.at(2) = mParameters.fx();
+  parameterVec.at(3) = mParameters.fy();
+  parameterVec.at(4) = mParameters.cx();
+  parameterVec.at(5) = mParameters.cy();
+}
+
+void EucmCamera::writeParametersToYamlFile(const std::string &filename) const {
+  mParameters.writeToYamlFile(filename);
+}
+
+std::string EucmCamera::parametersToString(void) const {
+  std::ostringstream oss;
+  oss << mParameters;
+
+  return oss.str();
+}
+
+EucmCostFunction::EucmCostFunction(const Eigen::Vector3d &_pts_i,
+                                   const Eigen::Vector2d &_pts_j)
+    : pts_i(_pts_i), pts_j(_pts_j){};
+
+/*EUCM full-estimate*/
+bool EucmCostFunction::Evaluate(double const *const *parameters,
+                                double *residuals, double **jacobians) const {
+
+  Eigen::Map<Eigen::Vector2d> residual(residuals);
+
+  Sophus::Vector6d Xi;
+  Xi << parameters[0][0], parameters[0][1], parameters[0][2], parameters[0][3],
+      parameters[0][4], parameters[0][5];
+  Sophus::SE3d T = Sophus::SE3d::exp(Xi);
+  Eigen::Vector3d pts_c_pre = T * pts_i;
+  double x = pts_c_pre[0];
+  double y = pts_c_pre[1];
+  double z = pts_c_pre[2];
+
+  double alpha = parameters[1][0];
+  double beta = parameters[1][1];
+
+  double rho = sqrt(beta * (x * x + y * y) + z * z);
+  double eta = alpha * rho + (1 - alpha) * z;
+
+  Eigen::Vector3d pts_m_pre(x / (alpha * rho + (1 - alpha) * z),
+                            y / (alpha * rho + (1 - alpha) * z), 1);
+
+  Eigen::Matrix<double, 2, 3, Eigen::RowMajor> dPm_dPc;
+  dPm_dPc(0, 0) = 1 / eta - (alpha * beta * x * x) / ((eta * eta) * rho);
+  dPm_dPc(0, 1) = (-alpha * beta * x * y) / ((eta * eta) * rho);
+  dPm_dPc(0, 2) = -x / (eta * eta) * ((1 - alpha) + alpha * z / rho);
+  dPm_dPc(1, 0) = (-alpha * beta * x * y) / ((eta * eta) * rho);
+  dPm_dPc(1, 1) = 1 / eta - (alpha * beta * y * y) / ((eta * eta) * rho);
+  dPm_dPc(1, 2) = -y / (eta * eta) * ((1 - alpha) + alpha * z / rho);
+
+  Eigen::Matrix<double, 3, 6, Eigen::RowMajor> dPc_dPw;
+  dPc_dPw(0, 0) = 1;
+  dPc_dPw(0, 4) = z;
+  dPc_dPw(0, 5) = -y;
+  dPc_dPw(1, 1) = 1;
+  dPc_dPw(1, 3) = -z;
+  dPc_dPw(1, 5) = x;
+  dPc_dPw(2, 2) = 1;
+  dPc_dPw(2, 3) = y;
+  dPc_dPw(2, 4) = -x;
+
+  Eigen::Matrix<double, 2, 2, Eigen::RowMajor> dPm_dD;
+  dPm_dD(0, 0) = -x / (eta * eta) * (rho - z);
+  dPm_dD(0, 1) = -x / (eta * eta) * (alpha * (x * x + y * y) / (2 * rho));
+  dPm_dD(1, 0) = -y / (eta * eta) * (rho - z);
+  dPm_dD(1, 1) = -y / (eta * eta) * (alpha * (x * x + y * y) / (2 * rho));
+
+  Eigen::Matrix<double, 2, 2, Eigen::RowMajor> dp_dPm;
+  dp_dPm(0, 0) = parameters[2][0];
+  dp_dPm(0, 1) = 0;
+  dp_dPm(1, 0) = 0;
+  dp_dPm(1, 1) = parameters[2][1];
+
+  Eigen::Matrix<double, 2, 4, Eigen::RowMajor> dp_dK;
+  dp_dK(0, 0) = pts_m_pre.x();
+  dp_dK(0, 1) = 0;
+  dp_dK(0, 2) = 1;
+  dp_dK(0, 3) = 0;
+  dp_dK(1, 0) = 0;
+  dp_dK(1, 1) = pts_m_pre.y();
+  dp_dK(1, 2) = 0;
+  dp_dK(1, 3) = 1;
+
+  residual[0] = pts_j[0] - (pts_m_pre[0] * parameters[2][0] + parameters[2][2]);
+  residual[1] = pts_j[1] - (pts_m_pre[1] * parameters[2][1] + parameters[2][3]);
+
+  if (jacobians) {
+    if (jacobians[0]) {
+      Eigen::Map<Eigen::Matrix<double, 2, 6, Eigen::RowMajor>> jacobian_pose_i(
+          jacobians[0]);
+      jacobian_pose_i.setZero();
+      jacobian_pose_i = -1 * dp_dPm * dPm_dPc * dPc_dPw;
+    }
+    if (jacobians[1]) {
+      Eigen::Map<Eigen::Matrix<double, 2, 2, Eigen::RowMajor>> jacobian_dist_i(
+          jacobians[1]);
+      jacobian_dist_i.setZero();
+      jacobian_dist_i = -1 * dp_dPm * dPm_dD;
+    }
+    if (jacobians[2]) {
+      Eigen::Map<Eigen::Matrix<double, 2, 4, Eigen::RowMajor>> jacobian_dist_i(
+          jacobians[2]);
+      jacobian_dist_i.setZero();
+      jacobian_dist_i = -1 * dp_dK;
+    }
+  }
+  return true;
+}
+
+/*Fisheye Camera*/
 FisheyeCamera::Parameters::Parameters()
     : Camera::Parameters(FISHEYE), m_k2(0.0), m_k3(0.0), m_k4(0.0), m_k5(0.0),
       m_mu(0.0), m_mv(0.0), m_u0(0.0), m_v0(0.0) {}
@@ -1864,6 +2317,9 @@ CostFunction::CreateCostFunction(const CameraConstPtr &camera,
                                         4, 3>(
             new ReprojectionError1<PinholeCamera>(observed_P, observed_p));
     break;
+  case Camera::EUCM:
+    costFunction = new EucmCostFunction(observed_P, observed_p);
+    break;
   }
   return costFunction;
 }
@@ -1876,7 +2332,6 @@ ceres::CostFunction *CostFunction::CreateCostFunction(
       StereoReprojectionError<PinholeCamera, FisheyeCamera>, 4, 8, 8, 4, 3, 4,
       3>(new StereoReprojectionError<PinholeCamera, FisheyeCamera>(
       observed_P, observed_p_l, observed_p_r));
-
   return costFunction;
 }
 
@@ -2257,7 +2712,6 @@ bool CameraCalibration::CalibrationExecute(
     camera->estimateExtrinsics(mScenePoints.at(i), image_points.at(i),
                                rvecs.at(i), tvecs.at(i));
   }
-
   if (mCamera) {
     std::cout << "[" << camera->CameraName() << "] "
               << "# INFO: "
@@ -2343,13 +2797,16 @@ void CameraCalibration::MonoOptimizer(
     CameraPtr &camera, std::vector<std::vector<cv::Point2f>> &image_points,
     std::vector<cv::Mat> &rvecs, std::vector<cv::Mat> &tvecs) const {
   // Use ceres to do optimization
+  int pos_num = rvecs.size();
+  double para_Pose[pos_num][6];
+  double para_Undistortion[2];
+  double para_Intrinsic[4];
   ceres::Problem problem;
   std::vector<Transform, Eigen::aligned_allocator<Transform>> transformVec(
-      rvecs.size());
-  for (size_t i = 0; i < rvecs.size(); ++i) {
+      pos_num);
+  for (size_t i = 0; i < pos_num; ++i) {
     Eigen::Vector3d rvec;
     cv::cv2eigen(rvecs.at(i), rvec);
-
     transformVec.at(i).rotation() =
         Eigen::AngleAxisd(rvec.norm(), rvec.normalized());
     transformVec.at(i).translation() << tvecs[i].at<double>(0),
@@ -2358,6 +2815,42 @@ void CameraCalibration::MonoOptimizer(
 
   std::vector<double> intrinsicCameraParams;
   camera->writeParameters(intrinsicCameraParams);
+
+  // Different parameters processes between Auto Jacobian and Analytic Jacobian
+  if (camera->modelType() == Camera::EUCM) {
+    para_Undistortion[0] = intrinsicCameraParams[0] + 0.3;
+    para_Undistortion[1] = intrinsicCameraParams[1] + 0.3;
+    para_Intrinsic[0] = intrinsicCameraParams[2];
+    para_Intrinsic[1] = intrinsicCameraParams[3];
+    para_Intrinsic[2] = intrinsicCameraParams[4];
+    para_Intrinsic[3] = intrinsicCameraParams[5];
+    ceres::LocalParameterization *local_parameterization_intrinsic =
+        new IntrinsicLocalParameterization();
+    problem.AddParameterBlock(para_Intrinsic, 4,
+                              local_parameterization_intrinsic);
+
+    ceres::LocalParameterization *local_parameterization =
+        new SophusLocalParameterization();
+
+    ceres::LocalParameterization *local_parameterization_Undistortion =
+        new DistortionLocalParameterization();
+    for (int pos_id = 0; pos_id < pos_num; pos_id++) {
+      para_Pose[pos_id][0] = tvecs[pos_id].at<double>(0);
+      para_Pose[pos_id][1] = tvecs[pos_id].at<double>(1);
+      para_Pose[pos_id][2] = tvecs[pos_id].at<double>(2);
+      para_Pose[pos_id][3] = rvecs[pos_id].at<double>(0);
+      para_Pose[pos_id][4] = rvecs[pos_id].at<double>(1);
+      para_Pose[pos_id][5] = rvecs[pos_id].at<double>(2);
+      problem.AddParameterBlock(para_Pose[pos_id], 6, local_parameterization);
+    }
+  } else {
+    for (int pos_id = 0; pos_id < pos_num; pos_id++) {
+      ceres::LocalParameterization *quaternionParameterization =
+          new EigenQuaternionParameterization;
+      problem.AddParameterBlock(transformVec.at(pos_id).rotationData(), 4,
+                                quaternionParameterization);
+    }
+  }
 
   // create residuals for each observation
   for (size_t i = 0; i < image_points.size(); ++i) {
@@ -2371,17 +2864,16 @@ void CameraCalibration::MonoOptimizer(
               Eigen::Vector2d(ipt.x, ipt.y));
 
       ceres::LossFunction *lossFunction = new ceres::CauchyLoss(1.0);
-      problem.AddResidualBlock(costFunction, lossFunction,
-                               intrinsicCameraParams.data(),
-                               transformVec.at(i).rotationData(),
-                               transformVec.at(i).translationData());
+      if (camera->modelType() == Camera::EUCM) {
+        problem.AddResidualBlock(costFunction, lossFunction, para_Pose[i],
+                                 para_Undistortion, para_Intrinsic);
+      } else {
+        problem.AddResidualBlock(costFunction, lossFunction,
+                                 intrinsicCameraParams.data(),
+                                 transformVec.at(i).rotationData(),
+                                 transformVec.at(i).translationData());
+      }
     }
-
-    ceres::LocalParameterization *quaternionParameterization =
-        new EigenQuaternionParameterization;
-
-    problem.SetParameterization(transformVec.at(i).rotationData(),
-                                quaternionParameterization);
   }
 
   std::cout << "begin ceres" << std::endl;
@@ -2396,24 +2888,38 @@ void CameraCalibration::MonoOptimizer(
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
   std::cout << "end ceres" << std::endl;
-
   if (mVerBose) {
     std::cout << summary.FullReport() << std::endl;
   }
+  if (camera->modelType() == Camera::EUCM) {
+    intrinsicCameraParams[0] = para_Undistortion[0];
+    intrinsicCameraParams[1] = para_Undistortion[1];
+    intrinsicCameraParams[2] = para_Intrinsic[0];
+    intrinsicCameraParams[3] = para_Intrinsic[1];
+    intrinsicCameraParams[4] = para_Intrinsic[2];
+    intrinsicCameraParams[5] = para_Intrinsic[3];
+    for (int pos_id = 0; pos_id < pos_num; pos_id++) {
+      tvecs[pos_id].at<double>(0) = para_Pose[pos_id][0];
+      tvecs[pos_id].at<double>(1) = para_Pose[pos_id][1];
+      tvecs[pos_id].at<double>(2) = para_Pose[pos_id][2];
+      rvecs[pos_id].at<double>(0) = para_Pose[pos_id][3];
+      rvecs[pos_id].at<double>(1) = para_Pose[pos_id][4];
+      rvecs[pos_id].at<double>(2) = para_Pose[pos_id][5];
+    }
+  } else {
+    for (size_t i = 0; i < rvecs.size(); ++i) {
+      Eigen::AngleAxisd aa(transformVec.at(i).rotation());
 
-  camera->readParameters(intrinsicCameraParams);
+      Eigen::Vector3d rvec = aa.angle() * aa.axis();
+      cv::eigen2cv(rvec, rvecs.at(i));
 
-  for (size_t i = 0; i < rvecs.size(); ++i) {
-    Eigen::AngleAxisd aa(transformVec.at(i).rotation());
-
-    Eigen::Vector3d rvec = aa.angle() * aa.axis();
-    cv::eigen2cv(rvec, rvecs.at(i));
-
-    cv::Mat &tvec = tvecs.at(i);
-    tvec.at<double>(0) = transformVec.at(i).translation()(0);
-    tvec.at<double>(1) = transformVec.at(i).translation()(1);
-    tvec.at<double>(2) = transformVec.at(i).translation()(2);
+      cv::Mat &tvec = tvecs.at(i);
+      tvec.at<double>(0) = transformVec.at(i).translation()(0);
+      tvec.at<double>(1) = transformVec.at(i).translation()(1);
+      tvec.at<double>(2) = transformVec.at(i).translation()(2);
+    }
   }
+  camera->readParameters(intrinsicCameraParams);
 }
 
 void CameraCalibration::StereoOptimizer(
@@ -2671,6 +3177,17 @@ CameraPtr GeneralCamera::CreateCamera(Camera::ModelType modelType,
     camera->setParameters(params);
     return camera;
   }
+
+  case Camera::EUCM: {
+    EucmCameraPtr camera(new EucmCamera);
+    EucmCamera::Parameters params = camera->getParameters();
+    params.CameraName() = CameraName;
+    params.imageWidth() = imageSize.width;
+    params.imageHeight() = imageSize.height;
+    camera->setParameters(params);
+    return camera;
+  }
+
   default: {
   }
   }

@@ -148,7 +148,6 @@ int RunForRealData() {
     }
     std::cout << "FrameCount_: " << viocali->FrameCount_ << std::endl;
   }
-
   bool isCamPose = viocali->CameraLocalization(world_corner, image_corner);
   cv::Mat CamPose = viocali->GetCameraPoses();
   std::vector<Eigen::Matrix3d> Rcw = viocali->GetCamRotation();
@@ -159,6 +158,105 @@ int RunForRealData() {
   } else {
     std::cout << "false " << std::endl;
   }
+  delete viocali;
+  return 0;
+}
+
+int GenerateEucmGT(int row, int col, double alpha, double beta,
+                   Sophus::Vector6d Xi, double chessboardSize,
+                   std::vector<Eigen::Vector3d> &Pw,
+                   std::vector<Eigen::Vector3d> &Pc,
+                   std::vector<Eigen::Vector3d> &Pm,
+                   std::vector<Eigen::Vector3d> &p) {
+
+  Sophus::SE3d T = Sophus::SE3d::exp(Xi);
+
+  for (int i = -row; i < row + 1; i++) {
+    for (int j = -col; j < col + 1; j++) {
+      Pw.push_back(Eigen::Vector3d(i * chessboardSize, j * chessboardSize, 0));
+    }
+  }
+
+  for (int i = 0; i < Pw.size(); i++) {
+    Pc.push_back(T * Pw[i]);
+  }
+
+  for (int i = 0; i < Pc.size(); i++) {
+    double x = Pc[i].x();
+    double y = Pc[i].y();
+    double z = Pc[i].z();
+    double rho = sqrt(beta * (x * x + y * y) + z * z);
+    Pm.push_back(Eigen::Vector3d(x / (alpha * rho + (1 - alpha) * z),
+                                 y / (alpha * rho + (1 - alpha) * z), 1));
+  }
+  double fx = 460;
+  double fy = 460;
+  double cx = 320;
+  double cy = 240;
+  for (int i = 0; i < Pm.size(); i++) {
+    p.push_back(Eigen::Vector3d(fx * Pm[i].x() + cx, fy * Pm[i].y() + cy, 1));
+  }
+  return 0;
+}
+
+int EucmSimulation() {
+  int pos_num = 10;
+  double alpha = 0.571;
+  double beta = 1.18;
+  int row = 20;
+  int col = 20;
+  double chessboardSize = 0.2;
+  double para_Pose[pos_num][6];
+  std::vector<Eigen::Vector3d> Pw[pos_num];
+  std::vector<Eigen::Vector3d> Pm[pos_num];
+  std::vector<Eigen::Vector3d> Pc[pos_num];
+  std::vector<Eigen::Vector3d> p[pos_num];
+  Sophus::Vector6d Xi[pos_num];
+
+  for (int pos_id = 0; pos_id < pos_num; pos_id++) {
+    double left_limit = (-pos_num * 0.1) / 2;
+    double right_limit = (pos_num * 0.1) / 2;
+    Xi[pos_id] << 0.0, 0.0, 0.1 * pos_id, right_limit - 0.1 * pos_id,
+        left_limit + 0.1 * pos_id, 0.0;
+    GenerateEucmGT(row, col, alpha, beta, Xi[pos_id], chessboardSize,
+                   Pw[pos_id], Pc[pos_id], Pm[pos_id], p[pos_id]);
+  }
+  cv::Size boardSize(20, 20);
+  cv::Size imageSize(640, 480);
+  float squareSize = 0.2;
+  int WindowSize = 20;
+  std::string cameraName = "cam_name";
+  Camera::ModelType modelType = Camera::ModelType::EUCM;
+  std::vector<std::vector<cv::Point3f>> world_corner;
+  std::vector<std::vector<cv::Point2f>> image_corner;
+  std::vector<cv::Point3f> objs;
+  std::vector<cv::Point2f> cornerses;
+  for (int pos_id = 0; pos_id < pos_num; pos_id++) {
+    std::vector<cv::Point3f> objs;
+    std::vector<cv::Point2f> cornerses;
+    for (int i = 0; i < p[pos_id].size(); i++) {
+      if (p[pos_id][i].x() > 1e-6 && p[pos_id][i].y() > 1e-6 &&
+          Pm[pos_id][i].z() > 1e-6) {
+        cv::Point3f obj;
+        cv::Point2f corners;
+        obj.x = static_cast<float>(Pw[pos_id][i].x());
+        obj.y = static_cast<float>(Pw[pos_id][i].y());
+        obj.z = static_cast<float>(Pw[pos_id][i].z());
+
+        corners.x = static_cast<float>(p[pos_id][i].x());
+        corners.y = static_cast<float>(p[pos_id][i].y());
+        objs.push_back(obj);
+        cornerses.push_back(corners);
+      }
+    }
+    world_corner.push_back(objs);
+    image_corner.push_back(cornerses);
+  }
+  Viocalibrate *viocali =
+      new Viocalibrate(cameraName, modelType, boardSize, imageSize, squareSize);
+
+  bool isCamPose = viocali->CameraLocalization(world_corner, image_corner);
+  cv::Mat CamPose = viocali->GetCameraPoses();
   delete viocali;
   return 0;
 }
@@ -250,4 +348,7 @@ int RunForSynthesisData() {
   return 0;
 }
 
-int main() { RunForSynthesisData(); }
+int main() {
+  RunForRealData();
+  EucmSimulation();
+}
