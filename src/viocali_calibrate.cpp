@@ -188,42 +188,62 @@ bool Viocalibrate::CalCulateValidation(
   return true;
 }
 
-void Viocalibrate::ValidOptimizer(std::vector<Eigen::Matrix3d> delta_R_cam,
-                                  std::vector<Eigen::Matrix3d> delta_R_imu) {
+void Viocalibrate::ValidOptimizer() {
 
   ceres::Problem problem;
   ceres::LossFunction *loss_function;
   loss_function = new ceres::CauchyLoss(1.0);
 
-  double Qbc[1][3];
-  Qbc[0][0] = 0.4;
-  Qbc[0][1] = 0.6;
-  Qbc[0][2] = 0.55;
+  int pos_num = 100;
+  double Extrinsic[1][6];
+  Extrinsic[0][0] = 0.205;
+  Extrinsic[0][1] = -0.107;
+  Extrinsic[0][2] = 0.078;
+  Extrinsic[0][3] = 0.4;
+  Extrinsic[0][4] = 0.1;
+  Extrinsic[0][5] = 0.2;
 
-  Eigen::Vector3d phi(1.2092, -1.2092, 1.2092);
-  Sophus::SO3d Rbc_SO3 = Sophus::SO3d::exp(phi);
-  Eigen::Matrix3d Rbc = Rbc_SO3.matrix();
-  ExRLocalParameterization *local_parameterization_intrinsic =
-      new ExRLocalParameterization();
-  problem.AddParameterBlock(Qbc[0], 3, local_parameterization_intrinsic);
+  Sophus::Vector6d Xbc;
+  Xbc << 0.2, 0.0, 0.1, 0.4, 0.1, 0.1;
+  Sophus::Vector6d Xbc_;
+  Xbc_ << Extrinsic[0][0], Extrinsic[0][1], Extrinsic[0][2], Extrinsic[0][3],
+      Extrinsic[0][4], Extrinsic[0][5];
+  Sophus::SE3d Tc[pos_num];
+  Sophus::SE3d Tb[pos_num];
+  Sophus::SE3d Tbc = Sophus::SE3d::exp(Xbc);
+  Sophus::SE3d Tbc_ = Sophus::SE3d::exp(Xbc_);
+  for (int pos_id = 1; pos_id < pos_num; pos_id++) {
+    Sophus::Vector6d Xc;
+    Xc << 0.3, 0.4, 0.2 * pos_id, 0.0 * pos_id, 0.1 * pos_id, 0.0;
+    Tc[pos_id] = Sophus::SE3d::exp(Xc);
+    Tb[pos_id] = Tbc * Tc[pos_id] * Tbc.inverse();
+  }
 
-  for (int i = 1; i < WINDOW_SIZE - 1; i++) {
-    ceres::CostFunction *costFunction =
-        new ExRFactor(delta_R_cam[i], Rbc * delta_R_cam[i] * Rbc.inverse());
-    problem.AddResidualBlock(costFunction, loss_function, Qbc[0]);
+  std::cout << " valid: "
+            << (Tb[3].inverse() * (Tbc_ * Tc[3] * Tbc_.inverse())).log() -
+                   (Tb[3].inverse() * (Tbc * Tc[3] * Tbc.inverse())).log()
+            << std::endl;
+
+  SophusLocalParameterization *local_parameterization_intrinsic =
+      new SophusLocalParameterization();
+  problem.AddParameterBlock(Extrinsic[0], 6, local_parameterization_intrinsic);
+
+  for (int pos_id = 0; pos_id < pos_num; pos_id++) {
+    ceres::CostFunction *costFunction = new ExTFactor(Tc[pos_id], Tb[pos_id]);
+    problem.AddResidualBlock(costFunction, loss_function, Extrinsic[0]);
   }
 
   ceres::Solver::Options options;
   options.minimizer_progress_to_stdout = true;
   options.use_nonmonotonic_steps = true;
   options.max_num_iterations = 100;
-  options.function_tolerance = 1e-9;
-  options.gradient_tolerance = 1e-9;
-  options.parameter_tolerance = 1e-9;
+  options.function_tolerance = 1e-18;
+  options.gradient_tolerance = 1e-18;
+  options.parameter_tolerance = 1e-18;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.BriefReport() << std::endl;
-  for (int i = 0; i < 3; i++) {
-    std::cout << Qbc[0][i] << " ";
-  }
+  std::cout << " Extrinsic " << Extrinsic[0][0] << " " << Extrinsic[0][1] << " "
+            << Extrinsic[0][2] << " " << Extrinsic[0][3] << " "
+            << Extrinsic[0][4] << " " << Extrinsic[0][5] << std::endl;
 }

@@ -79,7 +79,7 @@ public:
   }
 
   static Eigen::Matrix<double, 3, 3>
-  Jleft(const Eigen::Matrix<double, 3, 3> &R) {
+  Jleft_SO3(const Eigen::Matrix<double, 3, 3> &R) {
     Eigen::AngleAxisd angle_axis(R);
     double theta = angle_axis.angle();
     Eigen::Vector3d rotation_axis = angle_axis.axis();
@@ -91,7 +91,7 @@ public:
   }
 
   static Eigen::Matrix<double, 3, 3>
-  Jright(const Eigen::Matrix<double, 3, 3> &R) {
+  Jright_SO3(const Eigen::Matrix<double, 3, 3> &R) {
     Eigen::AngleAxisd angle_axis(R);
     double theta = -1 * angle_axis.angle();
     Eigen::Vector3d rotation_axis = angle_axis.axis();
@@ -99,6 +99,28 @@ public:
         sin(theta) / theta * Eigen::Matrix3d::Identity() +
         (1 - sin(theta) / theta) * rotation_axis * rotation_axis.transpose() +
         ((1 - cos(theta)) / theta) * skewSymmetric(rotation_axis);
+    return ans;
+  }
+
+  static Eigen::Matrix<double, 6, 6>
+  Jleft_SE3(const Eigen::Matrix<double, 3, 3> &R) {
+    Eigen::Matrix<double, 6, 6> ans;
+    ans.setZero();
+    Eigen::Matrix3d Jl = Jleft_SO3(R);
+    ans.block<3, 3>(0, 0) = Jl;
+    ans.block<3, 3>(0, 3) = R;
+    ans.block<3, 3>(3, 3) = Jl;
+    return ans;
+  }
+
+  static Eigen::Matrix<double, 6, 6>
+  Jright_SE3(const Eigen::Matrix<double, 3, 3> &R) {
+    Eigen::Matrix<double, 6, 6> ans;
+    ans.setZero();
+    Eigen::Matrix3d Jr = Jright_SO3(R);
+    ans.block<3, 3>(0, 0) = Jr;
+    ans.block<3, 3>(0, 3) = R;
+    ans.block<3, 3>(3, 3) = Jr;
     return ans;
   }
 

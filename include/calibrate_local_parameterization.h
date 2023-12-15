@@ -11,7 +11,6 @@ class SophusLocalParameterization : public ceres::LocalParameterization {
     const Eigen::Map<const Eigen::Matrix<double, 6, 1>> lie(x);
     const Eigen::Map<const Eigen::Matrix<double, 6, 1>> delta_lie(delta);
     Eigen::Map<Eigen::Matrix<double, 6, 1>> x_plus_delta_lie(x_plus_delta);
-
     Sophus::SE3d T = Sophus::SE3d::exp(lie);
     Sophus::SE3d delta_T = Sophus::SE3d::exp(delta_lie);
     x_plus_delta_lie = (delta_T * T).log();
@@ -34,9 +33,7 @@ class DistortionLocalParameterization : public ceres::LocalParameterization {
     const Eigen::Map<const Eigen::Matrix<double, 2, 1>> K(x);
     const Eigen::Map<const Eigen::Matrix<double, 2, 1>> delta_K(delta);
     Eigen::Map<Eigen::Matrix<double, 2, 1>> x_plus_delta_K(x_plus_delta);
-
     x_plus_delta_K = K + delta_K;
-
     return true;
   }
 

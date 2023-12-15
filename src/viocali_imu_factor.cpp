@@ -324,28 +324,6 @@ bool ImuFactor::Evaluate(double const *const *parameters, double *residuals,
 ExRFactor::ExRFactor(const Eigen::Matrix3d &_R_c, const Eigen::Matrix3d &_R_b)
     : Rc(_R_c), Rb(_R_b){};
 
-// /*useful process*/
-// bool ExRFactor::Evaluate(double const *const *parameters, double *residuals,
-//                          double **jacobians) const {
-//   Eigen::Map<Eigen::Vector3d> residual(residuals);
-//   Eigen::Vector3d p(1, 1, 1);
-//   Sophus::Vector3d phi;
-//   phi << parameters[0][0], parameters[0][1], parameters[0][2];
-//   Sophus::SO3d R = Sophus::SO3d::exp(phi);
-//   Eigen::Matrix3d Rbc = R.matrix();
-//   residual = Rc * p - Rbc.transpose() * Rb * Rbc * p;
-//   if (jacobians) {
-//     if (jacobians[0]) {
-//       Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> jacobian_R(
-//           jacobians[0]);
-//       jacobian_R =
-//           -1 * (-Rbc.transpose() * Rb * Rbc * Utility::skewSymmetric(p) +
-//                 Utility::skewSymmetric(Rbc.transpose() * Rb * Rbc * p));
-//     }
-//   }
-//   return true;
-// }
-
 bool ExRFactor::Evaluate(double const *const *parameters, double *residuals,
                          double **jacobians) const {
   Eigen::Map<Eigen::Vector3d> residual(residuals);
@@ -364,8 +342,42 @@ bool ExRFactor::Evaluate(double const *const *parameters, double *residuals,
       Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> jacobian_R(
           jacobians[0]);
       jacobian_R =
-          Utility::Jright((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix()) -
-          Utility::Jleft((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix());
+          Utility::Jright_SO3((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix()) -
+          Utility::Jleft_SO3((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix());
+    }
+  }
+  return true;
+}
+
+ExTFactor::ExTFactor(const Sophus::SE3d &_T_c, const Sophus::SE3d &_T_b)
+    : Tc_SE3(_T_c), Tb_SE3(_T_b){};
+
+bool ExTFactor::Evaluate(double const *const *parameters, double *residuals,
+                         double **jacobians) const {
+  Eigen::Map<Eigen::Matrix<double, 6, 1>> residual(residuals);
+  Sophus::Vector3d phi;
+  phi << parameters[0][3], parameters[0][4], parameters[0][5];
+  Sophus::Vector6d Xi;
+  Xi << parameters[0][0], parameters[0][1], parameters[0][2], parameters[0][3],
+      parameters[0][4], parameters[0][5];
+  Sophus::SO3d Rbc_SO3 = Sophus::SO3d::exp(phi);
+  Sophus::SE3d Tbc_SE3 = Sophus::SE3d::exp(Xi);
+  Sophus::SO3d Rc_SO3 = Tc_SE3.so3();
+  Sophus::SO3d Rb_SO3 = Tb_SE3.so3();
+  residual = (Tb_SE3.inverse() * (Tbc_SE3 * Tc_SE3 * Tbc_SE3.inverse())).log();
+  //   std::cout << " residuals " << residuals[0] << " " << residuals[1] << " "
+  //             << residuals[2] << " " << residuals[3] << " " << residuals[4]
+  //             << " "
+  //             << residuals[5] << std::endl;
+  if (jacobians) {
+    if (jacobians[0]) {
+      Eigen::Map<Eigen::Matrix<double, 6, 6, Eigen::RowMajor>> jacobian_T(
+          jacobians[0]);
+      jacobian_T =
+          (Utility::Jright_SE3((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix()))
+              .inverse() -
+          (Utility::Jleft_SE3((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix()))
+              .inverse();
     }
   }
   return true;

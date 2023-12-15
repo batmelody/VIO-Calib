@@ -257,6 +257,7 @@ int EucmSimulation() {
 
   bool isCamPose = viocali->CameraLocalization(world_corner, image_corner);
   cv::Mat CamPose = viocali->GetCameraPoses();
+  viocali->ValidOptimizer();
   delete viocali;
   return 0;
 }
@@ -349,6 +350,5 @@ int RunForSynthesisData() {
 }
 
 int main() {
-  RunForRealData();
   EucmSimulation();
 }
