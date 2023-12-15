@@ -2,7 +2,7 @@
 ---
 
 #cam
-cam_dir: "/home/weizhengyu/VIO_Simulation/bin/cam_pose.txt"
+cam_dir: "/home/zhengyuwei/VIO_Simulation/bin/cam_pose.txt"
 cam_name: "WZY Camera"
 squaresize: 0.04
 
@@ -15,7 +15,7 @@ imagesize:
  height: 960
 
 #imu
-imu_dir: "/home/weizhengyu/VIO_Simulation/bin/imu_pose.txt"
+imu_dir: "/home/zhengyuwei/VIO_Simulation/bin/imu_pose.txt"
 imu_fps: 300
 
 
