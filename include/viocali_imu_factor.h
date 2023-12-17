@@ -81,7 +81,7 @@ public:
   Eigen::Matrix3d Rc, Rb;
 };
 
-class ExTFactor : public ceres::SizedCostFunction<6, 6> {
+class ExTFactor : public ceres::SizedCostFunction<6, 3, 3> {
 public:
   ExTFactor(const Sophus::SE3d &_T_c, const Sophus::SE3d &_T_b);
   virtual bool Evaluate(double const *const *parameters, double *residuals,

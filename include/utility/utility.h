@@ -102,28 +102,6 @@ public:
     return ans;
   }
 
-  static Eigen::Matrix<double, 6, 6>
-  Jleft_SE3(const Eigen::Matrix<double, 3, 3> &R) {
-    Eigen::Matrix<double, 6, 6> ans;
-    ans.setZero();
-    Eigen::Matrix3d Jl = Jleft_SO3(R);
-    ans.block<3, 3>(0, 0) = Jl;
-    ans.block<3, 3>(0, 3) = R;
-    ans.block<3, 3>(3, 3) = Jl;
-    return ans;
-  }
-
-  static Eigen::Matrix<double, 6, 6>
-  Jright_SE3(const Eigen::Matrix<double, 3, 3> &R) {
-    Eigen::Matrix<double, 6, 6> ans;
-    ans.setZero();
-    Eigen::Matrix3d Jr = Jright_SO3(R);
-    ans.block<3, 3>(0, 0) = Jr;
-    ans.block<3, 3>(0, 3) = R;
-    ans.block<3, 3>(3, 3) = Jr;
-    return ans;
-  }
-
   static Eigen::Vector3d R2ypr(const Eigen::Matrix3d &R) {
     Eigen::Vector3d n = R.col(0);
     Eigen::Vector3d o = R.col(1);

@@ -194,43 +194,40 @@ void Viocalibrate::ValidOptimizer() {
   ceres::LossFunction *loss_function;
   loss_function = new ceres::CauchyLoss(1.0);
 
-  int pos_num = 100;
-  double Extrinsic[1][6];
-  Extrinsic[0][0] = 0.205;
-  Extrinsic[0][1] = -0.107;
-  Extrinsic[0][2] = 0.078;
-  Extrinsic[0][3] = 0.4;
-  Extrinsic[0][4] = 0.1;
-  Extrinsic[0][5] = 0.2;
+  int pos_num = 10;
+  double Extrinsic[2][3];
+  Extrinsic[0][0] = 0.2;
+  Extrinsic[0][1] = 0.4;
+  Extrinsic[0][2] = 0.1;
+  Extrinsic[1][0] = -0.4;
+  Extrinsic[1][1] = 0.3;
+  Extrinsic[1][2] = 0.8;
 
   Sophus::Vector6d Xbc;
   Xbc << 0.2, 0.0, 0.1, 0.4, 0.1, 0.1;
   Sophus::Vector6d Xbc_;
-  Xbc_ << Extrinsic[0][0], Extrinsic[0][1], Extrinsic[0][2], Extrinsic[0][3],
-      Extrinsic[0][4], Extrinsic[0][5];
+  Xbc_ << Extrinsic[0][0], Extrinsic[0][1], Extrinsic[0][2], Extrinsic[1][0],
+      Extrinsic[1][1], Extrinsic[1][2];
+
   Sophus::SE3d Tc[pos_num];
   Sophus::SE3d Tb[pos_num];
   Sophus::SE3d Tbc = Sophus::SE3d::exp(Xbc);
   Sophus::SE3d Tbc_ = Sophus::SE3d::exp(Xbc_);
   for (int pos_id = 1; pos_id < pos_num; pos_id++) {
     Sophus::Vector6d Xc;
-    Xc << 0.3, 0.4, 0.2 * pos_id, 0.0 * pos_id, 0.1 * pos_id, 0.0;
+    Xc << 0.3, 0.4, 0.2 * pos_id, 0.1, 0.1 * pos_id, 0.1;
     Tc[pos_id] = Sophus::SE3d::exp(Xc);
     Tb[pos_id] = Tbc * Tc[pos_id] * Tbc.inverse();
   }
 
-  std::cout << " valid: "
-            << (Tb[3].inverse() * (Tbc_ * Tc[3] * Tbc_.inverse())).log() -
-                   (Tb[3].inverse() * (Tbc * Tc[3] * Tbc.inverse())).log()
-            << std::endl;
+  ExRLocalParameterization *local_parameterization_intrinsic =
+      new ExRLocalParameterization();
+  problem.AddParameterBlock(Extrinsic[1], 3, local_parameterization_intrinsic);
 
-  SophusLocalParameterization *local_parameterization_intrinsic =
-      new SophusLocalParameterization();
-  problem.AddParameterBlock(Extrinsic[0], 6, local_parameterization_intrinsic);
-
-  for (int pos_id = 0; pos_id < pos_num; pos_id++) {
+  for (int pos_id = 1; pos_id < pos_num; pos_id++) {
     ceres::CostFunction *costFunction = new ExTFactor(Tc[pos_id], Tb[pos_id]);
-    problem.AddResidualBlock(costFunction, loss_function, Extrinsic[0]);
+    problem.AddResidualBlock(costFunction, loss_function, Extrinsic[0],
+                             Extrinsic[1]);
   }
 
   ceres::Solver::Options options;
@@ -244,6 +241,6 @@ void Viocalibrate::ValidOptimizer() {
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.BriefReport() << std::endl;
   std::cout << " Extrinsic " << Extrinsic[0][0] << " " << Extrinsic[0][1] << " "
-            << Extrinsic[0][2] << " " << Extrinsic[0][3] << " "
-            << Extrinsic[0][4] << " " << Extrinsic[0][5] << std::endl;
+            << Extrinsic[0][2] << " " << Extrinsic[1][0] << " "
+            << Extrinsic[1][1] << " " << Extrinsic[1][2] << std::endl;
 }

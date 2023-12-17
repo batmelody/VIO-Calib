@@ -342,9 +342,10 @@ bool ExRFactor::Evaluate(double const *const *parameters, double *residuals,
       Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> jacobian_R(
           jacobians[0]);
       jacobian_R =
-          -(Utility::Jright((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix()))
+          -(Utility::Jright_SO3(
+                (Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix()))
                .inverse() +
-          Utility::Jleft((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix())
+          Utility::Jleft_SO3((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix())
               .inverse();
     }
   }
@@ -358,27 +359,33 @@ bool ExTFactor::Evaluate(double const *const *parameters, double *residuals,
                          double **jacobians) const {
   Eigen::Map<Eigen::Matrix<double, 6, 1>> residual(residuals);
   Sophus::Vector3d phi;
-  phi << parameters[0][3], parameters[0][4], parameters[0][5];
+  phi << parameters[1][0], parameters[1][1], parameters[1][2];
   Sophus::Vector6d Xi;
-  Xi << parameters[0][0], parameters[0][1], parameters[0][2], parameters[0][3],
-      parameters[0][4], parameters[0][5];
+  Xi << parameters[0][0], parameters[0][1], parameters[0][2], parameters[1][0],
+      parameters[1][1], parameters[1][2];
   Sophus::SO3d Rbc_SO3 = Sophus::SO3d::exp(phi);
   Sophus::SE3d Tbc_SE3 = Sophus::SE3d::exp(Xi);
   Sophus::SO3d Rc_SO3 = Tc_SE3.so3();
   Sophus::SO3d Rb_SO3 = Tb_SE3.so3();
   residual = (Tb_SE3.inverse() * (Tbc_SE3 * Tc_SE3 * Tbc_SE3.inverse())).log();
-  //   std::cout << " residuals " << residuals[0] << " " << residuals[1] << " "
-  //             << residuals[2] << " " << residuals[3] << " " << residuals[4]
-  //             << " "
-  //             << residuals[5] << std::endl;
   if (jacobians) {
     if (jacobians[0]) {
-      Eigen::Map<Eigen::Matrix<double, 6, 6, Eigen::RowMajor>> jacobian_T(
+      Eigen::Map<Eigen::Matrix<double, 6, 3, Eigen::RowMajor>> jacobian_t(
           jacobians[0]);
-      jacobian_T =
-          (Utility::Jright_SE3((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix()))
-              .inverse() -
-          (Utility::Jleft_SE3((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix()))
+      jacobian_t.setZero();
+      jacobian_t.block<3, 3>(0, 0) =
+          -(Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix() +
+          Eigen::Matrix3d::Identity();
+    }
+    if (jacobians[1]) {
+      Eigen::Map<Eigen::Matrix<double, 6, 3, Eigen::RowMajor>> jacobian_R(
+          jacobians[1]);
+      jacobian_R.setZero();
+      jacobian_R.block<3, 3>(3, 0) =
+          -(Utility::Jright_SO3(
+                (Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix()))
+               .inverse() +
+          Utility::Jleft_SO3((Rbc_SO3 * Rc_SO3 * Rbc_SO3.inverse()).matrix())
               .inverse();
     }
   }
