@@ -25,6 +25,12 @@ struct CameraData {
   Eigen::Quaterniond Qwc;
 };
 
+struct LidarData {
+  Eigen::Vector3d plane_normal;
+  Eigen::Vector3d lidar_point;
+  double plane_distance;
+};
+
 std::queue<ImuData> ReadImuDataFromSimulation(const std::string &filename) {
   int unit_time = 1;
   std::queue<ImuData> data;
@@ -90,6 +96,34 @@ std::queue<CameraData> ReadCamDataFromSimulation(const std::string &filename) {
       col++;
     }
     data.push(cameraData);
+  }
+  file.close();
+  return data;
+}
+
+std::deque<LidarData> ReadLidarData(const std::string &filename) {
+  std::deque<LidarData> data;
+  std::ifstream file(filename);
+  if (!file.is_open()) {
+    std::cerr << "Could not open file: " << filename << std::endl;
+    return data;
+  }
+  std::string line;
+  while (std::getline(file, line)) {
+    LidarData lidarData;
+    int col = 0;
+    std::stringstream ss(line);
+    std::string str;
+    while (std::getline(ss, str, ' ')) {
+      if (col < 3) {
+        lidarData.plane_normal(col) = std::stod(str);
+      }
+      if (col > 2 && col < 6) {
+        lidarData.lidar_point(col - 3) = std::stod(str);
+      }
+      col++;
+    }
+    data.push_back(lidarData);
   }
   file.close();
   return data;

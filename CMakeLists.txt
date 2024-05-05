@@ -15,9 +15,6 @@ find_package(Sophus REQUIRED)
 
 find_package(FMT REQUIRED)
 
-include_directories( )
-
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 find_package(Eigen3)
 include_directories(
   include
@@ -32,10 +29,25 @@ add_executable(viocali_estimator
         src/calibrate_local_parameterization.cpp
         src/viocali_camera_factor.cpp
         src/viocali_imu_factor.cpp
+        src/viocali_lidar_factor.cpp
+        src/utility.cpp
+        )
+
+add_executable(liocali_estimator
+        viocali_lidar_node.cpp
+        src/viocali_calibrate.cpp
+        src/parameters.cpp
+        src/calibrate_local_parameterization.cpp
+        src/viocali_camera_factor.cpp
+        src/viocali_imu_factor.cpp
+        src/viocali_lidar_factor.cpp
         src/utility.cpp
         )
 
 target_link_libraries(viocali_estimator ${OpenCV_LIBS} ${CERES_LIBRARIES} fmt::fmt)
+
+target_link_libraries(liocali_estimator ${OpenCV_LIBS} ${CERES_LIBRARIES} fmt::fmt)
+
 
 
 
