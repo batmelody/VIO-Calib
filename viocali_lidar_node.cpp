@@ -124,22 +124,6 @@ int main() {
     inittbl[1] = parameters[3][1] - 0.5;
     inittbl[2] = parameters[3][2] - 0.1;
 
-    // // SE3 Tb0bk 3x4
-    // Eigen::Vector3d tb0bk;
-    // Sophus::Vector3d theta_b0bk;
-    // theta_b0bk << parameters[0][0], parameters[0][1], parameters[0][2];
-    // tb0bk << parameters[1][0], parameters[1][1], parameters[1][2];
-    // Sophus::SO3d Rb0bk_SO3 = Sophus::SO3d::exp(theta_b0bk);
-    // Eigen::Matrix3d Rb0bk = Rb0bk_SO3.matrix();
-
-    // // SE3 Tbl 3x4
-    // Eigen::Vector3d tbl;
-    // Sophus::Vector3d theta_bl;
-    // theta_bl << parameters[2][0], parameters[2][1], parameters[2][2];
-    // tbl << parameters[3][0], parameters[3][1], parameters[3][2];
-    // Sophus::SO3d Rbl_SO3 = Sophus::SO3d::exp(theta_bl);
-    // Eigen::Matrix3d Rbl = Rbl_SO3.matrix();
-
     problem.AddParameterBlock(initRbl, 3, local_Ex_R);
     problem.AddParameterBlock(initRb0bk[idx], 3, local_Pose_R);
 
@@ -158,11 +142,10 @@ int main() {
       problem.SetParameterBlockConstant(initb0bk[idx]);
     }
   }
-  // 3. 配置求解器
-  ceres::Solver::Options options; // 这里有很多配置项可以填
-  options.linear_solver_type = ceres::DENSE_NORMAL_CHOLESKY; // 增量方程如何求解
+  ceres::Solver::Options options;
+  options.linear_solver_type = ceres::DENSE_NORMAL_CHOLESKY;
   options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
-  options.minimizer_progress_to_stdout = true; // 输出到cout
+  options.minimizer_progress_to_stdout = true;
   options.use_nonmonotonic_steps = true;
   options.max_num_iterations = 100;
   options.function_tolerance = 1e-18;
