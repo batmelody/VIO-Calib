@@ -9,22 +9,44 @@
 #include <unordered_map>
 #include <vector>
 
-void LidarDataSynthesis(std::deque<LidarData> &LidarData,
-                        std::deque<Eigen::Vector3d> &world_points,
-                        const double rb0bk[3], const double pb0bk[3]) {
-  double parameters[4][3];
-  parameters[0][0] = rb0bk[0];
-  parameters[0][1] = rb0bk[1];
-  parameters[0][2] = rb0bk[2];
-  parameters[1][0] = pb0bk[0];
-  parameters[1][1] = pb0bk[1];
-  parameters[1][2] = pb0bk[2];
-  parameters[2][0] = -1.112231;
-  parameters[2][1] = -1.0899273;
-  parameters[2][2] = 1.2874745;
-  parameters[3][0] = -0.160473;
-  parameters[3][1] = -0.043055002;
-  parameters[3][2] = 0.040006001;
+void WorldDataSynthesis(std::deque<Eigen::Vector3d> &world_points,
+                        std::deque<Eigen::Vector3d> &plane_normal,
+                        const int &row, const int &col) {
+  // plane 1:
+  Eigen::Vector3d normal_z(0, 0, 1);
+  for (int i = -row; i < row; i++) {
+    for (int j = -col; j < col; j++) {
+      Eigen::Vector3d world(i, j, 10);
+      world_points.push_back(world);
+      plane_normal.push_back(normal_z);
+    }
+  }
+
+  // plane 2:
+  Eigen::Vector3d normal_x(1, 0, 0);
+  for (int i = -row; i < row; i++) {
+    for (int j = -col; j < col; j++) {
+      Eigen::Vector3d world(-7, i, j);
+      world_points.push_back(world);
+      plane_normal.push_back(normal_x);
+    }
+  }
+
+  // plane 3:
+  Eigen::Vector3d normal_y(0, 1, 0);
+  for (int i = -row; i < row; i++) {
+    for (int j = -col; j < col; j++) {
+      Eigen::Vector3d world(i, 10, j);
+      world_points.push_back(world);
+      plane_normal.push_back(normal_y);
+    }
+  }
+}
+
+void LidarDataSynthesis(std::deque<LidarData> &LidarDatas,
+                        const std::deque<Eigen::Vector3d> &world_points,
+                        const std::deque<Eigen::Vector3d> &plane_normal,
+                        const double parameters[4][3]) {
   Eigen::Vector3d tb0bk, tbl;
   Sophus::Vector3d theta_b0bk, theta_bl;
 
@@ -33,31 +55,46 @@ void LidarDataSynthesis(std::deque<LidarData> &LidarData,
   tb0bk << parameters[1][0], parameters[1][1], parameters[1][2];
   Sophus::SO3d Rb0bk_SO3 = Sophus::SO3d::exp(theta_b0bk);
   Eigen::Matrix3d Rb0bk = Rb0bk_SO3.matrix();
+  Sophus::SE3d Tb0bk(Rb0bk, tb0bk);
+
+  // SE3 Tbkb0 3x4
+  Sophus::SE3d Tbkb0 = Tb0bk.inverse();
 
   // SE3 Tbl 3x4
   theta_bl << parameters[2][0], parameters[2][1], parameters[2][2];
   tbl << parameters[3][0], parameters[3][1], parameters[3][2];
   Sophus::SO3d Rbl_SO3 = Sophus::SO3d::exp(theta_bl);
   Eigen::Matrix3d Rbl = Rbl_SO3.matrix();
+  Sophus::SE3d Tbl(Rbl, tbl);
 
-  for (int i = 0; i < LidarData.size(); i++) {
-    Eigen::Vector3d lidar = LidarData[i].lidar_point;
-    Eigen::Vector3d world = Rbl.transpose() * Rb0bk * (Rbl * lidar + tbl) +
-                            Rbl.transpose() * tb0bk - Rbl.transpose() * tbl;
-    world_points.push_back(world);
-    LidarData[i].plane_distance = LidarData[i].plane_normal.transpose() * world;
+  // SE3 Tlb 3x4
+  Sophus::SE3d Tlb = Tbl.inverse();
+
+  // SE3 Tcw 3x4
+  Sophus::SE3d Tcw = Tlb * Tbkb0 * Tbl;
+  Eigen::Matrix3d Rcw = Tcw.rotationMatrix();
+  Eigen::Vector3d tcw = Tcw.translation();
+
+  for (int i = 0; i < world_points.size(); i++) {
+    LidarData lidardata;
+    lidardata.lidar_point = Rcw * world_points[i] + tcw;
+    lidardata.plane_normal = plane_normal[i];
+    lidardata.plane_distance = plane_normal[i].transpose() * world_points[i];
+    LidarDatas.push_back(lidardata);
   }
 }
 
 int main() {
-  std::string LidarDir = "/home/zhengyuwei/Desktop/meas.txt";
-  std::deque<LidarData> LidarGt = ReadLidarData(LidarDir);
-  int FrameSize = 5;
+  std::deque<Eigen::Vector3d> world_points;
+  std::deque<Eigen::Vector3d> plane_normal;
+  WorldDataSynthesis(world_points, plane_normal, 5, 5);
+
+  int FrameSize = 10;
 
   // init gt
   double parameters[4][3];
-  parameters[0][0] = 0.0017697101;
-  parameters[0][1] = -0.0017156728;
+  parameters[0][0] = 0.2017697101;
+  parameters[0][1] = -0.2017156728;
   parameters[0][2] = 0.70844859;
   parameters[1][0] = -0.26450777;
   parameters[1][1] = -0.22045621;
@@ -81,14 +118,14 @@ int main() {
   LidarLocalParam *local_Ex_R = new LidarLocalParam();
 
   for (int idx = 0; idx < FrameSize; idx++) {
-    std::deque<Eigen::Vector3d> world_points;
+    std::deque<LidarData> LidarGt;
     parameters[0][0] = 0.0017697101 + 0.05 * idx * pow(-1, idx);
     parameters[0][1] = -0.0017156728 - 0.05 * idx * pow(-1, idx);
     parameters[0][2] = 0.70844859 + 0.05 * idx * pow(-1, idx);
     parameters[1][0] = 0.0017697101 + 0.1 * idx * pow(-1, idx);
     parameters[1][1] = -0.0017156728 - 0.2 * idx * pow(-1, idx);
     parameters[1][2] = 0.70844859 + 0.1 * idx * pow(-1, idx);
-    LidarDataSynthesis(LidarGt, world_points, parameters[0], parameters[1]);
+    LidarDataSynthesis(LidarGt, world_points, plane_normal, parameters);
 
     if (idx < 2) {
       // init Rb0bk
